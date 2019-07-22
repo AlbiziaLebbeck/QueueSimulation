@@ -25,7 +25,13 @@ class guiMain(tk.Frame):
         self.Menu.place(x=0,y=0,height=50,width=1023)
 
         self.btRun = tk.Button(self.Menu,text='Run',command=self.run)
-        self.btRun.place(x=0,y=0,height=46,width=46)
+        self.btRun.place(x=0,y=0,height=46,width=49)
+
+        self.btStop = tk.Button(self.Menu,text='Stop',command=self.stop)
+        self.btStop.place(x=50,y=0,height=46,width=49)
+
+        self.runSim = True
+
 
         self.moduleMenu = tk.Frame(self.root,borderwidth=2,relief=tk.RIDGE)
         self.moduleMenu.place(x=0,y=50,height=717,width=150)
@@ -297,7 +303,12 @@ class guiMain(tk.Frame):
 #######          Simulation Runing Method          #######
 ##########################################################
 
+    def stop(self):
+        self.runSim = False
+
     def run(self):
+
+        self.runSim = True
 
         self.sim.setup(10000,False)
 

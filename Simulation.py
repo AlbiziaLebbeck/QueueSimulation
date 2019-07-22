@@ -24,7 +24,7 @@ class simulation():
 
     def run(self):
         
-        while self.sysTime <= self.simTime:
+        while self.sysTime <= self.simTime and self.guiObj.runSim:
             
             if self.debug:
                 print("Systime:",self.sysTime)
