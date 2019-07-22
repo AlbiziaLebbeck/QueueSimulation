@@ -88,8 +88,8 @@ class guiMain(tk.Frame):
 
         elif module == 'Sw':
             eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='gold',tags=('module','Sw'))
-            self.modules[eId] = Component.Server(eId,[x,y])
-            self.btQueue.config(relief=tk.RAISED)
+            self.modules[eId] = Component.Switch(eId,[x,y])
+            self.btSwitch.config(relief=tk.RAISED)
         
         tEId = self.workSpace.create_text(x,y+30,text=self.modules[eId].Name,anchor=tk.CENTER)
         self.modules[eId].tEId = tEId
@@ -299,7 +299,7 @@ class guiMain(tk.Frame):
 
     def run(self):
 
-        self.sim.setup(10000,True)
+        self.sim.setup(10000,False)
 
         self.sim.run()
 

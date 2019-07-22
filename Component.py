@@ -81,6 +81,7 @@ class Server(Component_Template):
     def init_run(self):
 
         self.onService = False
+        self.incoming = 0
         
         self.queue = 0 
 
@@ -114,6 +115,7 @@ class Server(Component_Template):
         if self.onService:
             if self.depTime <= systime:
                 self.onService = False
+                self.incoming -= 1
 
         return [0,None]
 
@@ -187,3 +189,56 @@ class Server(Component_Template):
         # self.ax2.step(self.tstatus,self.dep_status)
         self.ax3.step(self.tstatus,[self.arr_status[i] - self.dep_status[i] for i in range(len(self.arr_status))])
         print('average',sum([self.arr_status[i] - self.dep_status[i] for i in range(len(self.arr_status))])/1000)
+
+class Switch(Component_Template):
+
+    count = 0
+
+    def __init__(self,eId,pos):
+        super().__init__()
+
+        Switch.count += 1
+
+        self.Id = Switch.count
+        self.Name = "switch" + str(self.Id)
+        self.moduleType = "Sw"
+
+        self.num_out = 99
+        self.num_in = 1
+
+        self.eId = eId
+        self.tEId = 0
+        self.pos = pos
+
+        self.dstOut = []
+
+    def init_run(self):
+
+        self.onService = False
+        self.incoming = 0
+        
+        self.queue = 0 
+            
+    def run(self,systime):
+        
+        if not self.onService and self.queue > 0:
+            self.onService = True
+            self.queue = 0
+        
+        if self.onService:
+            for d in self.dstOut:
+                if d.incoming == 0:
+                    self.onService = False
+                    self.incoming -= 1
+                    return [1,d]
+
+        return [0,None]
+
+    def updateGui(self,WS):
+        if self.onService:
+            WS.itemconfig(self.eId,fill='salmon')
+        else:
+            WS.itemconfig(self.eId,fill='gold')
+    
+    def stop(self,WS):
+        WS.itemconfig(self.eId,fill='gold')

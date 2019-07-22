@@ -39,6 +39,7 @@ class simulation():
 
                 for i in range(pout[0]): 
                     target = pout[1]
+                    target.incoming += 1
                     self.people.append(person(self.modules[m],target,self.workSpace))
             
             self.updateGui()
