@@ -33,6 +33,7 @@ class simulation():
                 p.update(self.sysTime)
                 if p.state == "onservice":
                     self.workSpace.delete(p.eId)
+                    self.people.remove(p)
 
             for m in self.modules:
                 pout = self.modules[m].run(self.sysTime)

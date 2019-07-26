@@ -30,6 +30,15 @@ class guiMain(tk.Frame):
         self.btStop = tk.Button(self.Menu,text='Stop',command=self.stop)
         self.btStop.place(x=50,y=0,height=46,width=49)
 
+        self.timeVar = tk.StringVar()
+        self.labelTime = tk.Label(self.Menu,text="Simulation time : ")
+        self.labelTime.place(x=110,y=3,height=40,width=100)
+        self.textTime = tk.Entry(self.Menu,bd = 3,textvariable=self.timeVar)
+        self.textTime.place(x=210,y=3,height=40,width=50)
+        self.labelUnit = tk.Label(self.Menu,text="s")
+        self.labelUnit.place(x=260,y=3,height=40,width=20)
+        self.timeVar.set("10000")
+
         self.runSim = True
 
 
@@ -133,7 +142,7 @@ class guiMain(tk.Frame):
     def end_line(self,event,src,line):
         x,y = event.x,event.y
         dst = [item for item in self.workSpace.find_overlapping(\
-            x-50,y-50,x+50,y+50) if 'module' in self.workSpace.gettags(item)] #\
+            x-20,y-20,x+20,y+20) if 'module' in self.workSpace.gettags(item)] #\
                 # and 'Src' not in self.workSpace.gettags(item) and item != src]
 
         if len(dst) > 0:
@@ -226,18 +235,31 @@ class guiMain(tk.Frame):
             for l in line:
                 src = self.lines[l][0]
                 self.modules[src].out_port = []
-                # self.modules[src][0].sinkQ = []
+                self.modules[src].dstOut = []
+                
                 self.workSpace.delete(l)
                 del self.lines[l]
             self.workSpace.delete(self.select_object)
             self.workSpace.delete(self.modules[self.select_object].tEId)
-            del self.modules[self.select_object]
+            self.modules.remove(self.select_object)
+            
         elif 'Line' in self.workSpace.gettags(self.select_object):
             src = self.lines[self.select_object][0]
             dst = self.lines[self.select_object][1]
-            self.modules[src].out_port = []
-            self.modules[dst].in_port = []
-            # self.modules[src][0].sinkQ = []
+
+            for i,l in enumerate(self.modules[src].out_port):
+                if l == self.select_object:
+                    self.modules[src].out_port.pop(i)
+
+            for i,l in enumerate(self.modules[dst].in_port):
+                if l == self.select_object:
+                    self.modules[dst].in_port.pop(i)
+
+            for i,d in enumerate(self.modules[src].dstOut):
+                if d == self.modules[dst]:
+                    self.modules[src].dstOut.pop(i)
+                    break
+            
             self.workSpace.delete(self.select_object)
             del self.lines[self.select_object]
 
@@ -310,7 +332,10 @@ class guiMain(tk.Frame):
 
         self.runSim = True
 
-        self.sim.setup(10000,False)
+        time = int(self.timeVar.get())
+        if time <= 0:
+            time = 100000000
+        self.sim.setup(time,False)
 
         self.sim.run()
 
