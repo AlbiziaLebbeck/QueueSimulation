@@ -202,7 +202,7 @@ class guiMain(tk.Frame):
         self.modules[self.select_object].pos = pos
 
         self.workSpace.unbind("<Motion>")
-        self.workSpace.bind("<Button-1>")
+        self.workSpace.unbind("<Button-1>")
 
     def moveMotion(self,event):
         px,py = event.x,event.y
@@ -221,6 +221,8 @@ class guiMain(tk.Frame):
         for l in line:
             lcor = self.workSpace.coords(l)
             self.workSpace.coords(l,lcor[0],lcor[1],px-w/2,py)
+        
+        # self.workSpace.unbind("<Button-1>")
 
 
     def delete_module(self):

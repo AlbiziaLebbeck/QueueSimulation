@@ -35,7 +35,7 @@ class Source(Component_Template):
     def init_run(self):
         self.last_arrival_time = np.random.exponential(1/self.arrivrate)
 
-    def run(self,systime):
+    def update(self,systime):
 
         if self.last_arrival_time <= systime:
             interarrtime = np.random.exponential(1/self.arrivrate)
@@ -82,10 +82,11 @@ class Server(Component_Template):
 
         self.onService = False
         self.incoming = 0
+        self.servicePerson = None
         
         self.queue = 0 
             
-    def run(self,systime):
+    def update(self,systime):
         
         if not self.onService and self.queue > 0:
             self.onService = True
@@ -115,18 +116,6 @@ class Server(Component_Template):
     def stop(self,WS):
         WS.itemconfig(self.eId,fill='deepskyblue')
 
-    def plot(self):
-        self.fig = plt.figure(self.ID,figsize=(6,4))
-        # self.ax1 = plt.subplot(3,1,1)
-        # self.ax2 = plt.subplot(2,1,2)
-        # self.ax3 = plt.subplot(2,1,1)
-        self.ax3 = plt.subplot(1,1,1)
-
-        # self.ax2.step(self.tstatus,self.arr_status)
-        # self.ax2.step(self.tstatus,self.dep_status)
-        self.ax3.step(self.tstatus,[self.arr_status[i] - self.dep_status[i] for i in range(len(self.arr_status))])
-        print('average',sum([self.arr_status[i] - self.dep_status[i] for i in range(len(self.arr_status))])/1000)
-
 class Switch(Component_Template):
 
     count = 0
@@ -153,10 +142,11 @@ class Switch(Component_Template):
 
         self.onService = False
         self.incoming = 0
+        self.servicePerson = None
         
         self.queue = 0 
             
-    def run(self,systime):
+    def update(self,systime):
         
         if not self.onService and self.queue > 0:
             self.onService = True

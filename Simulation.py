@@ -33,15 +33,16 @@ class simulation():
                 p.update(self.sysTime)
                 if p.state == "onservice":
                     self.workSpace.delete(p.eId)
+                    # p.target.servicePerson = p
                     self.people.remove(p)
 
             for m in self.modules:
-                pout = self.modules[m].run(self.sysTime)
+                pout = self.modules[m].update(self.sysTime)
 
                 for i in range(pout[0]): 
                     target = pout[1]
                     target.incoming += 1
-                    self.people.append(person(self.modules[m],target,self.workSpace))
+                    self.people.append(person(self.modules[m],target,self.workSpace,self.sysTime))
             
             self.updateGui()
 
@@ -75,7 +76,7 @@ class simulation():
 
 class person():
 
-    def __init__(self,src,target,WS):
+    def __init__(self,src,target,WS,timeCreate):
 
         self.dz = 1
         self.size = 20
@@ -88,6 +89,8 @@ class person():
         self.eId = WS.create_oval(x-self.size//2,y-self.size//2,x+self.size//2,y+self.size//2,fill='salmon')
 
         self.state = "walking"
+
+        self.timeCreate = [timeCreate]
 
     def update(self,system):
 
