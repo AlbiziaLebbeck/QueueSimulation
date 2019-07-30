@@ -15,7 +15,7 @@ class person():
 
         self.state = "walking"
 
-        self.time = [(src.Name + "(in)",timeCreate)]
+        self.time = [(src.Name + "(out)",timeCreate)]
 
         self.isDraw = False
 
