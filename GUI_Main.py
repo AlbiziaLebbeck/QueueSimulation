@@ -221,8 +221,6 @@ class guiMain(tk.Frame):
         for l in line:
             lcor = self.workSpace.coords(l)
             self.workSpace.coords(l,lcor[0],lcor[1],px-w/2,py)
-        
-        # self.workSpace.unbind("<Button-1>")
 
 
     def delete_module(self):
@@ -243,7 +241,7 @@ class guiMain(tk.Frame):
                 del self.lines[l]
             self.workSpace.delete(self.select_object)
             self.workSpace.delete(self.modules[self.select_object].tEId)
-            self.modules.remove(self.select_object)
+            del self.modules[self.select_object]
             
         elif 'Line' in self.workSpace.gettags(self.select_object):
             src = self.lines[self.select_object][0]
