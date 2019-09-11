@@ -60,6 +60,11 @@ class guiMain(tk.Frame):
         self.workSpace = tk.Canvas(self.root, width=1023, height=717,background='white')
         self.workSpace.place(x=150,y=50, width=873, height=717)
         self.workSpace.bind("<Button-3>",lambda e: self.rightClick(e))
+        self.gridsize = 5
+        for col in range(1,1023//(self.gridsize*10)):
+            self.workSpace.create_line(col*self.gridsize*10,0,col*self.gridsize*10,717,tags=('grid'),fill='lightgray')
+        for row in range(1,717//(self.gridsize*10)):
+            self.workSpace.create_line(0,row*self.gridsize*10,1023,row*self.gridsize*10,tags=('grid'),fill='lightgray')
 
         self.modules = {}
         self.lines = {}
@@ -89,7 +94,8 @@ class guiMain(tk.Frame):
 
 
     def add_item(self,event,module):
-        x,y = event.x,event.y
+        dg = self.gridsize
+        x,y = event.x//dg*dg,event.y//dg*dg
 
         if module == 'Src':
             eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='mediumspringgreen',tags=('module','Src'))
@@ -130,7 +136,7 @@ class guiMain(tk.Frame):
                 self.workSpace.itemconfig(src[0],outline='lime')
                 pos_src = self.workSpace.coords(src[0])
                 pos1 = (pos_src[2],(pos_src[1]+pos_src[3])/2)
-                line = self.workSpace.create_line(pos1[0],pos1[1],x,y,tags=('Line'),arrow=tk.LAST)
+                line = self.workSpace.create_line(pos1[0],pos1[1],x,y,tags=('Line'),arrow=tk.LAST, width=2)
                 self.workSpace.bind("<Motion>", lambda e: self.moveLink(e,src[0],line))
                 self.workSpace.bind("<Button-1>",lambda e: self.end_line(e,src[0],line))
             else:
@@ -177,7 +183,8 @@ class guiMain(tk.Frame):
 
     def rightClick(self,event):
         item_list = [item for item in \
-                       self.workSpace.find_overlapping(event.x-5, event.y-5, event.x+5, event.y+5)]
+                        self.workSpace.find_overlapping(event.x-5, event.y-5, event.x+5, event.y+5) \
+                        if not 'grid' in self.workSpace.gettags(item)]
         print(item_list)
         if len(item_list) > 0:
             self.select_object = item_list[0]
@@ -186,7 +193,7 @@ class guiMain(tk.Frame):
                 Rpopup.add_command(label="Move",command=self.move_module) # , command=next) etc...
                 Rpopup.add_command(label="Delete",command=self.delete_module)
                 Rpopup.add_separator()
-                Rpopup.add_command(label="Properties",command=self.editPrpperties)
+                Rpopup.add_command(label="Properties",command=self.editPropperties)
             elif 'Line' in self.workSpace.gettags(self.select_object):
                 Rpopup.add_command(label="Delete",command=self.delete_module)
             Rpopup.tk_popup(event.x_root, event.y_root)
@@ -205,7 +212,8 @@ class guiMain(tk.Frame):
         self.workSpace.unbind("<Button-1>")
 
     def moveMotion(self,event):
-        px,py = event.x,event.y
+        dg = self.gridsize
+        px,py = event.x//dg*dg,event.y//dg*dg
         cor = self.workSpace.coords(self.select_object)
         w = cor[2]-cor[0]
         h = cor[3]-cor[1] 
@@ -263,7 +271,7 @@ class guiMain(tk.Frame):
             self.workSpace.delete(self.select_object)
             del self.lines[self.select_object]
 
-    def editPrpperties(self):
+    def editPropperties(self):
         propWin = tk.Toplevel()
         module = self.modules[self.select_object]
         propWin.title("Properties: " + module.Name)
@@ -338,21 +346,3 @@ class guiMain(tk.Frame):
         self.sim.setup(time,False)
 
         self.sim.run()
-
-        
-        # while self.systime <= self.totaltime :
-        #     print(self.systime)
-        #     for m in self.modules:
-        #         self.modules[m][0].run(self.systime)
-        #     self.systime = self.systime+self.dt    
-            # traff_source.update_output(Q1,systime)
-
-
-        # for m in self.modules:
-        #     if 'Queue' in self.workSpace.gettags(m):  
-        #         self.modules[m][0].plot()
-        # plt.title('mm'+str(Q1.num_server)+'  arrival rate = '+str(traff_source.arrivrate)+'  departure rate ='+str(Q1.deprate))
-            # plt.pause(0.01)
-        # plt.subplot(2,1,1)
-        # plt.legend(["Queue 1","Queue 2","Queue 3","Queue 4"])
-        # plt.show()
