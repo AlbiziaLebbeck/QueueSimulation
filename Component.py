@@ -205,3 +205,72 @@ class Switch(Component_Template):
     
     def stop(self,WS):
         WS.itemconfig(self.eId,fill='gold')
+
+class Junction(Component_Template):
+
+    count = 0
+
+    def __init__(self,eId,pos):
+        super().__init__()
+
+        Junction.count += 1
+
+        self.Id = Junction.count
+        self.Name = "junction" + str(self.Id)
+        self.moduleType = "๋Junc"
+
+        self.num_out = 1
+        self.num_in = 99
+
+        self.eId = eId
+        self.tEId = 0
+        self.pos = pos
+
+        self.dstOut = []
+
+    def init_run(self):
+
+        self.onService = False
+        self.incoming = 0
+        self.servicePerson = None
+        
+        self.queue = [0 for i in range(1)]
+
+            
+    def update(self,systime):
+        
+        if not self.onService and self.queue > 0:
+            self.onService = True
+            self.queue = 0
+        
+        if self.onService:
+            p = self.servicePerson
+            if len(self.dstOut) > 0:
+                for d in self.dstOut:
+                    p.time.append((self.Name + "(out)",systime))
+                    self.onService = False
+                    self.incoming -= 1
+                    
+                    self.servicePerson = None
+
+                    d.incoming += 1
+                    p.target = d
+                    p.pos = [float(self.pos[0]+20),float(self.pos[1])]
+                    p.state = "walking"
+
+                    return [0,p]
+            else:
+                self.servicePerson = None
+                return [2,p]
+            
+
+        return [0,None]
+
+    def updateGui(self,WS):
+        if self.onService:
+            WS.itemconfig(self.eId,fill='salmon')
+        else:
+            WS.itemconfig(self.eId,fill='gold')
+    
+    def stop(self,WS):
+        WS.itemconfig(self.eId,fill='gold')

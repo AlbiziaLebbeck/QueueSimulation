@@ -54,8 +54,11 @@ class guiMain(tk.Frame):
         self.btSwitch = tk.Button(self.moduleMenu,text='Switch',command=self.create_switch)
         self.btSwitch.place(x=0,y=150,height=75,width=146)
 
+        self.btJunction = tk.Button(self.moduleMenu,text='Junction',command=self.create_junction)
+        self.btJunction.place(x=0,y=225,height=75,width=146)
+
         self.btLine = tk.Button(self.moduleMenu,text='Link',command=self.create_line)
-        self.btLine.place(x=0,y=225,height=75,width=146)
+        self.btLine.place(x=0,y=300,height=75,width=146)
 
         self.workSpace = tk.Canvas(self.root, width=1023, height=717,background='white')
         self.workSpace.place(x=150,y=50, width=873, height=717)
@@ -93,6 +96,11 @@ class guiMain(tk.Frame):
         self.workSpace.bind("<Button-1>",lambda e: self.add_item(e,'Sw'))
 
 
+    def create_junction(self):
+        self.btSwitch.config(relief=tk.SUNKEN)
+        self.workSpace.bind("<Button-1>",lambda e: self.add_item(e,'Junc'))
+
+
     def add_item(self,event,module):
         dg = self.gridsize
         x,y = event.x//dg*dg,event.y//dg*dg
@@ -110,6 +118,11 @@ class guiMain(tk.Frame):
         elif module == 'Sw':
             eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='gold',tags=('module','Sw'))
             self.modules[eId] = Component.Switch(eId,[x,y])
+            self.btSwitch.config(relief=tk.RAISED)
+
+        elif module == 'Junc':
+            eId = self.workSpace.create_rectangle(x-10,y-10,x+10,y+10,fill='salmon',tags=('module','Junc'))
+            self.modules[eId] = Component.Junction(eId,[x,y])
             self.btSwitch.config(relief=tk.RAISED)
         
         tEId = self.workSpace.create_text(x,y+30,text=self.modules[eId].Name,anchor=tk.CENTER)
