@@ -31,25 +31,28 @@ class Source(Component_Template):
         self.tEId = 0
         self.pos = pos
 
-        self.arrivrate = 0.005
+        self.arrivrate = 0.1
+        self.seed = Source.Count
         self.dstOut = []
 
         self.servicePerson = None
         
     def init_run(self):
+        np.random.seed(seed=self.seed)
         self.last_arrival_time = np.random.exponential(1/self.arrivrate)
 
     def update(self,systime):
 
         if self.last_arrival_time <= systime and len(self.dstOut):
 
-            self.dstOut[0].incoming += 1
+            self.dstOut[0][0].incoming += 1
             p = People.person(self,self.dstOut[0],self.last_arrival_time)
 
+            np.random.seed(seed=int(systime*10)*self.seed)
             interarrtime = np.random.exponential(1/self.arrivrate)
 
-            if interarrtime < 20:
-                interarrtime = 20
+            if interarrtime < 0.4:
+                interarrtime = 0.4
 
             self.last_arrival_time += interarrtime
             
@@ -83,16 +86,18 @@ class Server(Component_Template):
         self.tEId = 0
         self.pos = pos
 
-        self.deprate = 0.005
+        self.deprate = 0.1
+        
+        self.srcIn = []
         self.dstOut = []
 
     def init_run(self):
 
         self.onService = False
-        self.incoming = 0
+        self.incoming = 0#[0 for i in range(len(self.srcIn))]
         self.servicePerson = None
         
-        self.queue = 0 
+        self.queue = 0#[0 for i in range(len(self.srcIn))] 
             
     def update(self,systime):
         
@@ -116,7 +121,7 @@ class Server(Component_Template):
                 if len(self.dstOut) > 0:
                     self.servicePerson = None
 
-                    self.dstOut[0].incoming += 1
+                    self.dstOut[0][0].incoming += 1
                     p.target = self.dstOut[0]
                     p.pos = [float(self.pos[0]+20),float(self.pos[1])]
                     p.state = "walking"
@@ -157,15 +162,16 @@ class Switch(Component_Template):
         self.tEId = 0
         self.pos = pos
 
+        self.srcIn = []
         self.dstOut = []
 
     def init_run(self):
 
         self.onService = False
-        self.incoming = 0
+        self.incoming = 0#[0 for i in range(len(self.srcIn))]
         self.servicePerson = None
         
-        self.queue = 0 
+        self.queue = 0#[0 for i in range(len(self.srcIn))]
             
     def update(self,systime):
         
@@ -177,14 +183,14 @@ class Switch(Component_Template):
             p = self.servicePerson
             if len(self.dstOut) > 0:
                 for d in self.dstOut:
-                    if d.incoming == 0:
+                    if d[0].incoming == 0:
                         p.time.append((self.Name + "(out)",systime))
                         self.onService = False
                         self.incoming -= 1
                         
                         self.servicePerson = None
 
-                        d.incoming += 1
+                        d[0].incoming += 1
                         p.target = d
                         p.pos = [float(self.pos[0]+20),float(self.pos[1])]
                         p.state = "walking"
@@ -226,15 +232,18 @@ class Junction(Component_Template):
         self.tEId = 0
         self.pos = pos
 
+        self.srcIn = []
         self.dstOut = []
 
     def init_run(self):
 
         self.onService = False
-        self.incoming = 0
+        self.incoming = 0#[0 for i in range(len(self.srcIn))]
         self.servicePerson = None
         
-        self.queue = [0 for i in range(1)]
+        self.queue = 0#[0 for i in range(len(self.srcIn))]
+
+        self.next_time = 0
 
             
     def update(self,systime):
@@ -247,18 +256,21 @@ class Junction(Component_Template):
             p = self.servicePerson
             if len(self.dstOut) > 0:
                 for d in self.dstOut:
-                    p.time.append((self.Name + "(out)",systime))
-                    self.onService = False
-                    self.incoming -= 1
-                    
-                    self.servicePerson = None
+                    if systime - self.next_time >= 0.4:
+                        p.time.append((self.Name + "(out)",systime))
+                        self.onService = False
+                        self.incoming -= 1
+                        
+                        self.servicePerson = None
 
-                    d.incoming += 1
-                    p.target = d
-                    p.pos = [float(self.pos[0]+20),float(self.pos[1])]
-                    p.state = "walking"
+                        d[0].incoming += 1
+                        p.target = d
+                        p.pos = [float(self.pos[0]+20),float(self.pos[1])]
+                        p.state = "walking"
 
-                    return [0,p]
+                        self.next_time = systime + 0.4
+
+                        return [0,p]
             else:
                 self.servicePerson = None
                 return [2,p]

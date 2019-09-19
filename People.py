@@ -4,7 +4,7 @@ class person():
 
     def __init__(self,src,target,timeCreate):
 
-        self.dz = 1
+        self.dz = 5
         self.size = 20
 
         self.target = target
@@ -23,11 +23,11 @@ class person():
 
         if not (self.state == "onservice"): 
 
-            X = self.target.pos[0]-20 - self.pos[0]
-            Y = self.target.pos[1] - self.pos[1]
+            X = self.target[0].pos[0]-20 - self.pos[0]
+            Y = self.target[0].pos[1] - self.pos[1]
             Z = math.sqrt(X**2 + Y**2)
 
-            if Z > self.size/2 + self.target.queue*self.size:
+            if Z > self.size/2 + self.target[0].queue*self.size:
 
                 self.state = "walking"
 
@@ -39,9 +39,9 @@ class person():
             
             elif self.state == "walking":
                 self.state = "wating"
-                self.target.queue += 1
+                self.target[0].queue += 1
 
-            if Z <= self.size/2 and (not self.target.onService):
+            if Z <= self.size/2 and (not self.target[0].onService):
                 self.state = "onservice"
 
     def updateGui(self,WS):

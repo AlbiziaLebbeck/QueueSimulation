@@ -177,7 +177,8 @@ class guiMain(tk.Frame):
                 self.modules[src].out_port.append(line)
                 self.modules[dst[0]].in_port.append(line)
 
-                self.modules[src].dstOut.append(self.modules[dst[0]])
+                self.modules[src].dstOut.append([self.modules[dst[0]],len(self.modules[dst[0]].srcIn)])
+                self.modules[dst[0]].srcIn.append([self.modules[src],len(self.modules[src].dstOut)-1])
 
             else:
                 print('Link cannot be created')
@@ -308,6 +309,15 @@ class guiMain(tk.Frame):
             arrEntry = tk.Entry(arrFrame,textvariable=arrVar)
             arrVar.set(str(module.arrivrate))
             arrEntry.pack(fill=tk.X,padx=5,expand=True)
+            
+            seedFrame = tk.Frame(propWin)
+            seedFrame.pack(fill=tk.X)
+            seedLabel = tk.Label(seedFrame,text='Seed',width=14)
+            seedLabel.pack(side=tk.LEFT,padx=5,pady=5)
+            seedVar = tk.StringVar()
+            seedEntry = tk.Entry(seedFrame,textvariable=seedVar)
+            seedVar.set(str(module.seed))
+            seedEntry.pack(fill=tk.X,padx=5,expand=True)
 
         elif module.moduleType == 'Serv':
             depFrame = tk.Frame(propWin)
@@ -323,6 +333,7 @@ class guiMain(tk.Frame):
             if module.moduleType == 'Src':
                 module.Name = nameVar.get()
                 module.arrivrate = float(arrVar.get())
+                module.seed = int(seedVar.get())
             elif module.moduleType == 'Serv':
                 module.Name = nameVar.get()
                 module.deprate = float(depVar.get())

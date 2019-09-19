@@ -35,8 +35,8 @@ class simulation():
                     if p.isDraw:
                         self.workSpace.delete(p.eId)
                         p.isDraw = False
-                        p.time.append((p.target.Name + "(in)",self.sysTime))
-                        p.target.servicePerson = p
+                        p.time.append((p.target[0].Name + "(in)",self.sysTime))
+                        p.target[0].servicePerson = p
 
             for m in self.modules:
                 pout = self.modules[m].update(self.sysTime)
@@ -53,7 +53,7 @@ class simulation():
             
             self.updateGui()
 
-            self.sysTime += 1
+            self.sysTime += 0.1
         
         record.close()
 
