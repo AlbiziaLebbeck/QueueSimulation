@@ -121,7 +121,7 @@ class guiMain(tk.Frame):
             self.btSwitch.config(relief=tk.RAISED)
 
         elif module == 'Junc':
-            eId = self.workSpace.create_rectangle(x-10,y-10,x+10,y+10,fill='salmon',tags=('module','Junc'))
+            eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='salmon',tags=('module','Junc'))
             self.modules[eId] = Component.Junction(eId,[x,y])
             self.btSwitch.config(relief=tk.RAISED)
         
@@ -174,11 +174,11 @@ class guiMain(tk.Frame):
                 self.workSpace.coords(line,pos1[0],pos1[1],pos2[0],pos2[1])
                 self.lines[line] = (src,dst[0])
 
-                self.modules[src].out_port.append(line)
-                self.modules[dst[0]].in_port.append(line)
+                self.modules[src].out_port.append((line,self.modules[src],self.modules[dst[0]]))
+                self.modules[dst[0]].in_port.append((line,self.modules[src],self.modules[dst[0]]))
 
-                self.modules[src].dstOut.append([self.modules[dst[0]],len(self.modules[dst[0]].srcIn)])
-                self.modules[dst[0]].srcIn.append([self.modules[src],len(self.modules[src].dstOut)-1])
+                # self.modules[src].dstOut.append([self.modules[dst[0]],len(self.modules[dst[0]].srcIn)])
+                # self.modules[dst[0]].srcIn.append([self.modules[src],len(self.modules[src].dstOut)-1])
 
             else:
                 print('Link cannot be created')
@@ -236,31 +236,35 @@ class guiMain(tk.Frame):
        
         line = self.modules[self.select_object].out_port
         for l in line:
-            lcor = self.workSpace.coords(l)
-            self.workSpace.coords(l,px+w/2,py,lcor[2],lcor[3])
+            lcor = self.workSpace.coords(l[0])
+            self.workSpace.coords(l[0],px+w/2,py,lcor[2],lcor[3])
         
         line = self.modules[self.select_object].in_port
         for l in line:
-            lcor = self.workSpace.coords(l)
-            self.workSpace.coords(l,lcor[0],lcor[1],px-w/2,py)
+            lcor = self.workSpace.coords(l[0])
+            self.workSpace.coords(l[0],lcor[0],lcor[1],px-w/2,py)
 
 
     def delete_module(self):
         if 'module' in self.workSpace.gettags(self.select_object):
             line = self.modules[self.select_object].out_port
             for l in line:
-                dst = self.lines[l][1]
-                self.modules[dst].in_port = []
-                self.workSpace.delete(l)
-                del self.lines[l]
+                dst = self.lines[l[0]][1]
+                for i,j in enumerate(self.modules[dst].in_port):
+                    self.modules[dst].in_port.pop(i)
+
+                self.workSpace.delete(l[0])
+                del self.lines[l[0]]
+
             line = self.modules[self.select_object].in_port
             for l in line:
-                src = self.lines[l][0]
-                self.modules[src].out_port = []
-                self.modules[src].dstOut = []
+                src = self.lines[l[0]][0]
+                for i,j in enumerate(self.modules[src].out_port):
+                    self.modules[src].out_port.pop(i)
                 
-                self.workSpace.delete(l)
-                del self.lines[l]
+                self.workSpace.delete(l[0])
+                del self.lines[l[0]]
+
             self.workSpace.delete(self.select_object)
             self.workSpace.delete(self.modules[self.select_object].tEId)
             del self.modules[self.select_object]
@@ -270,17 +274,12 @@ class guiMain(tk.Frame):
             dst = self.lines[self.select_object][1]
 
             for i,l in enumerate(self.modules[src].out_port):
-                if l == self.select_object:
+                if l[0] == self.select_object:
                     self.modules[src].out_port.pop(i)
 
             for i,l in enumerate(self.modules[dst].in_port):
-                if l == self.select_object:
+                if l[0] == self.select_object:
                     self.modules[dst].in_port.pop(i)
-
-            for i,d in enumerate(self.modules[src].dstOut):
-                if d == self.modules[dst]:
-                    self.modules[src].dstOut.pop(i)
-                    break
             
             self.workSpace.delete(self.select_object)
             del self.lines[self.select_object]

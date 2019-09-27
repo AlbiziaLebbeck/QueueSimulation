@@ -2,16 +2,22 @@ import math
 
 class person():
 
-    def __init__(self,src,target,timeCreate):
+    def __init__(self,src,q_id,timeCreate):
 
         self.dz = 5
         self.size = 20
 
-        self.target = target
+        self.target = src.out_port[0][2]
+        self.q_id = q_id
+        
+        self.queue = len(self.target.queue[q_id])
+        self.target.queue[q_id].append(self)
+
         self.pos = [float(src.pos[0]+20),float(src.pos[1])]
 
-        x = int(self.pos[0])
-        y = int(self.pos[1])
+        x = self.target.pos[0] - 20 - self.pos[0]
+        y = self.target.pos[1] - self.pos[1]
+        self.max_z = math.sqrt(x**2 + y**2)
 
         self.state = "walking"
 
@@ -23,11 +29,11 @@ class person():
 
         if not (self.state == "onservice"): 
 
-            X = self.target[0].pos[0]-20 - self.pos[0]
-            Y = self.target[0].pos[1] - self.pos[1]
+            X = self.target.pos[0] - 20 - self.pos[0]
+            Y = self.target.pos[1] - self.pos[1]
             Z = math.sqrt(X**2 + Y**2)
 
-            if Z > self.size/2 + self.target[0].queue*self.size:
+            if Z > self.size/2 + self.queue*self.size:
 
                 self.state = "walking"
 
@@ -37,12 +43,9 @@ class person():
                 self.pos[0] += dx
                 self.pos[1] += dy
             
-            elif self.state == "walking":
+            else:
                 self.state = "wating"
-                self.target[0].queue += 1
 
-            if Z <= self.size/2 and (not self.target[0].onService):
-                self.state = "onservice"
 
     def updateGui(self,WS):
 

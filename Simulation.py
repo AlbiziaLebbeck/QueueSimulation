@@ -35,8 +35,6 @@ class simulation():
                     if p.isDraw:
                         self.workSpace.delete(p.eId)
                         p.isDraw = False
-                        p.time.append((p.target[0].Name + "(in)",self.sysTime))
-                        p.target[0].servicePerson = p
 
             for m in self.modules:
                 pout = self.modules[m].update(self.sysTime)
@@ -65,8 +63,8 @@ class simulation():
             self.modules[m].updateGui(self.workSpace)
 
         for p in self.people:
-            if not (p.state == "onservice"):
-                p.updateGui(self.workSpace)
+            # if not (p.state == "onservice"):
+            p.updateGui(self.workSpace)
         
         self.guiObj.update()
 

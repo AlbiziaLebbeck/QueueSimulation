@@ -33,7 +33,6 @@ class Source(Component_Template):
 
         self.arrivrate = 0.1
         self.seed = Source.Count
-        self.dstOut = []
 
         self.servicePerson = None
         
@@ -43,10 +42,15 @@ class Source(Component_Template):
 
     def update(self,systime):
 
-        if self.last_arrival_time <= systime and len(self.dstOut):
+        if self.last_arrival_time <= systime and len(self.out_port) > 0:
 
-            self.dstOut[0][0].incoming += 1
-            p = People.person(self,self.dstOut[0],self.last_arrival_time)
+            line = self.out_port[0]
+            for i in range(len(line[2].in_port)):
+                if line[2].in_port[i] == line:
+                    q_id = i
+                    break
+
+            p = People.person(self,q_id,self.last_arrival_time)
 
             np.random.seed(seed=int(systime*10)*self.seed)
             interarrtime = np.random.exponential(1/self.arrivrate)
@@ -87,46 +91,57 @@ class Server(Component_Template):
         self.pos = pos
 
         self.deprate = 0.1
-        
-        self.srcIn = []
-        self.dstOut = []
 
     def init_run(self):
 
         self.onService = False
-        self.incoming = 0#[0 for i in range(len(self.srcIn))]
         self.servicePerson = None
         
-        self.queue = 0#[0 for i in range(len(self.srcIn))] 
+        self.queue = [[] for i in range(len(self.in_port))] 
             
     def update(self,systime):
         
-        if not self.onService and self.queue > 0:
-            self.onService = True
-            self.queue = 0
+        if not self.onService: 
+            for i in range(len(self.queue)):
+                if len(self.queue[i]) > 0:
+                    if self.queue[i][0].state == "wating":
+                        self.onService = True
+                        self.servicePerson = self.queue[i].pop(0)
+                        self.servicePerson.state = "onservice"
+                        self.servicePerson.time.append((self.servicePerson.target.Name + "(in)",systime))
 
-            if self.deprate == 0:
-                self.depTime = systime
-            else:
-                self.depTime = systime + np.random.exponential(1/self.deprate)
+                        if self.deprate == 0:
+                            self.depTime = systime
+                        else:
+                            self.depTime = systime + np.random.exponential(1/self.deprate)
+
+                        for j in range(len(self.queue[i])):
+                            self.queue[i][j].queue = j
         
         if self.onService:
             if self.depTime <= systime:
                 self.onService = False
-                self.incoming -= 1
 
                 p = self.servicePerson
                 p.time.append((self.Name + "(out)",self.depTime))
-
-                if len(self.dstOut) > 0:
+                
+                if len(self.out_port) > 0:
                     self.servicePerson = None
 
-                    self.dstOut[0][0].incoming += 1
-                    p.target = self.dstOut[0]
+                    p.target = self.out_port[0][2]
                     p.pos = [float(self.pos[0]+20),float(self.pos[1])]
                     p.state = "walking"
 
-                    return [0,None]
+                    line = self.out_port[0]
+                    for i in range(len(line[2].in_port)):
+                        if line[2].in_port[i] == line:
+                            q_id = i
+                            break
+
+                    p.queue = len(p.target.queue[q_id])
+                    p.target.queue[q_id].append(p)
+
+                    return [0,p]
                 else:
                     self.servicePerson = None
                     return [2,p]
@@ -162,38 +177,52 @@ class Switch(Component_Template):
         self.tEId = 0
         self.pos = pos
 
-        self.srcIn = []
-        self.dstOut = []
-
     def init_run(self):
 
         self.onService = False
-        self.incoming = 0#[0 for i in range(len(self.srcIn))]
         self.servicePerson = None
         
-        self.queue = 0#[0 for i in range(len(self.srcIn))]
+        self.queue = [[] for i in range(len(self.in_port))]
             
     def update(self,systime):
         
-        if not self.onService and self.queue > 0:
-            self.onService = True
-            self.queue = 0
+        if not self.onService: 
+            for i in range(len(self.queue)):
+                if len(self.queue[i]) > 0:
+                    if self.queue[i][0].state == "wating":
+                        self.onService = True
+                        self.servicePerson = self.queue[i].pop(0)
+                        self.servicePerson.state = "onservice"
+                        self.servicePerson.time.append((self.servicePerson.target.Name + "(in)",systime))
+
+                        for j in range(len(self.queue[i])):
+                            self.queue[i][j].queue = j
         
         if self.onService:
-            p = self.servicePerson
-            if len(self.dstOut) > 0:
-                for d in self.dstOut:
-                    if d[0].incoming == 0:
+            if len(self.out_port) > 0:
+                for line in self.out_port:
+                    for i in range(len(line[2].in_port)):
+                        if line[2].in_port[i] == line:
+                            q_id = i
+                            break
+
+                    incoming = len(line[2].queue[q_id])
+                    if line[2].onService:
+                        incoming += 1
+
+                    if incoming == 0:
+                        p = self.servicePerson
                         p.time.append((self.Name + "(out)",systime))
                         self.onService = False
-                        self.incoming -= 1
                         
                         self.servicePerson = None
 
-                        d[0].incoming += 1
-                        p.target = d
+                        p.target = line[2]
                         p.pos = [float(self.pos[0]+20),float(self.pos[1])]
                         p.state = "walking"
+
+                        p.queue = len(p.target.queue[q_id])
+                        p.target.queue[q_id].append(p)
 
                         return [0,p]
             else:
@@ -232,48 +261,62 @@ class Junction(Component_Template):
         self.tEId = 0
         self.pos = pos
 
-        self.srcIn = []
-        self.dstOut = []
-
     def init_run(self):
 
         self.onService = False
-        self.incoming = 0#[0 for i in range(len(self.srcIn))]
         self.servicePerson = None
         
-        self.queue = 0#[0 for i in range(len(self.srcIn))]
+        self.queue = [[] for i in range(len(self.in_port))]
 
-        self.next_time = 0
+        self.depTime = 0
 
             
     def update(self,systime):
         
-        if not self.onService and self.queue > 0:
-            self.onService = True
-            self.queue = 0
+        if not self.onService:
+            for i in range(len(self.queue)):
+                if len(self.queue[i]) > 0 and not self.onService:
+                    if self.queue[i][0].state == "wating":
+                        self.onService = True
+                        self.servicePerson = self.queue[i].pop(0)
+                        self.servicePerson.state = "onservice"
+                        self.servicePerson.time.append((self.servicePerson.target.Name + "(in)",systime))
+
+                        if self.depTime == 0:
+                            self.depTime = systime
+                        else:
+                            self.depTime = systime + 0.4
+
+                        for j in range(len(self.queue[i])):
+                            self.queue[i][j].queue = j
         
         if self.onService:
-            p = self.servicePerson
-            if len(self.dstOut) > 0:
-                for d in self.dstOut:
-                    if systime - self.next_time >= 0.4:
-                        p.time.append((self.Name + "(out)",systime))
-                        self.onService = False
-                        self.incoming -= 1
-                        
-                        self.servicePerson = None
+            if self.depTime <= systime:
+                self.onService = False
+                
+                p = self.servicePerson
+                p.time.append((self.Name + "(out)",systime))
 
-                        d[0].incoming += 1
-                        p.target = d
-                        p.pos = [float(self.pos[0]+20),float(self.pos[1])]
-                        p.state = "walking"
+                if len(self.out_port) > 0:
+                    self.servicePerson = None
 
-                        self.next_time = systime + 0.4
+                    p.target = self.out_port[0][2]
+                    p.pos = [float(self.pos[0]+20),float(self.pos[1])]
+                    p.state = "walking"
 
-                        return [0,p]
-            else:
-                self.servicePerson = None
-                return [2,p]
+                    line = self.out_port[0]
+                    for i in range(len(line[2].in_port)):
+                        if line[2].in_port[i] == line:
+                            q_id = i
+                            break
+
+                    p.queue = len(p.target.queue[q_id])
+                    p.target.queue[q_id].append(p)
+
+                    return [0,p]
+                else:
+                    self.servicePerson = None
+                    return [2,p]
             
 
         return [0,None]
