@@ -63,8 +63,8 @@ class simulation():
             self.modules[m].updateGui(self.workSpace)
 
         for p in self.people:
-            # if not (p.state == "onservice"):
-            p.updateGui(self.workSpace)
+            if not (p.state == "onservice"):
+                p.updateGui(self.workSpace)
         
         self.guiObj.update()
 

@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import time
 import random
 
@@ -97,7 +98,7 @@ class Server(Component_Template):
         self.onService = False
         self.servicePerson = None
         
-        self.queue = [[] for i in range(len(self.in_port))] 
+        self.queue = [[] for port in self.in_port]
             
     def update(self,systime):
         
@@ -182,7 +183,7 @@ class Switch(Component_Template):
         self.onService = False
         self.servicePerson = None
         
-        self.queue = [[] for i in range(len(self.in_port))]
+        self.queue = [[] for port in self.in_port]
             
     def update(self,systime):
         
@@ -266,7 +267,11 @@ class Junction(Component_Template):
         self.onService = False
         self.servicePerson = None
         
-        self.queue = [[] for i in range(len(self.in_port))]
+        self.queue = [[] for port in self.in_port]
+
+        x = self.out_port[0][2].pos[0] - 20 - self.pos[0]
+        y = self.out_port[0][2].pos[1] - self.pos[1]
+        self.max_Qlen = math.sqrt(x**2 + y**2)//20
 
         self.depTime = 0
 
@@ -291,7 +296,14 @@ class Junction(Component_Template):
                             self.queue[i][j].queue = j
         
         if self.onService:
-            if self.depTime <= systime:
+            if len(self.out_port) > 0:
+                for i in range(len(self.out_port[0][2].in_port)):
+                    if self.out_port[0][2].in_port[i] == self.out_port[0]:
+                        q_id = i
+                        break
+
+            cur_Qlen = len(self.out_port[0][2].queue[q_id])
+            if self.depTime <= systime and cur_Qlen < self.max_Qlen:
                 self.onService = False
                 
                 p = self.servicePerson
