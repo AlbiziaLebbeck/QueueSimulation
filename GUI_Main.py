@@ -321,7 +321,7 @@ class guiMain(tk.Frame):
         elif module.moduleType == 'Serv':
             depFrame = tk.Frame(propWin)
             depFrame.pack(fill=tk.X)
-            depLabel = tk.Label(depFrame,text='Departure rate',width=14)
+            depLabel = tk.Label(depFrame,text='Service rate',width=14)
             depLabel.pack(side=tk.LEFT,padx=5,pady=5)
             depVar = tk.StringVar()
             depEntry = tk.Entry(depFrame,textvariable=depVar)
