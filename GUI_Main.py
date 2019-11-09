@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import matplotlib.pyplot as plt
 
 import Component
 import Simulation
@@ -38,6 +39,9 @@ class guiMain(tk.Frame):
         self.labelUnit = tk.Label(self.Menu,text="s")
         self.labelUnit.place(x=260,y=3,height=40,width=20)
         self.timeVar.set("10000")
+
+        self.btResult = tk.Button(self.Menu,text='Result',command=self.result)
+        self.btResult.place(x=300,y=0,height=46,width=49)
 
         self.runSim = True
 
@@ -369,3 +373,98 @@ class guiMain(tk.Frame):
         self.sim.setup(time,False)
 
         self.sim.run()
+
+        self.result()
+
+
+    def result(self):
+
+        result_window = tk.Toplevel()
+        result_window.title("Results")
+
+        records = open("traffic_record2", "r") 
+
+        in_list = {}
+        out_list = {}
+
+        for line in records:
+            recs = line.split(",")
+            for rec in recs:
+                if rec != "\n":
+                    module = rec.split(":")[0]
+                    if module[-2] == 'n':
+                        if module[:-4] not in in_list:
+                            in_list[module[:-4]] = tk.IntVar()
+                    else:
+                        if module[:-5] not in out_list:
+                            out_list[module[:-5]] = tk.IntVar()
+        
+        tk.Label(result_window, text = "start:").grid(row = 0, column = 0, sticky=tk.W)
+        tk.Label(result_window, text = "end:").grid(row = 0, column = 1, sticky=tk.W)
+
+        i = 1
+        for v in out_list:
+            tk.Checkbutton(result_window, text=v, variable = out_list[v]).grid(row=i, column = 0, sticky=tk.W)
+            i += 1
+        last_row = i
+
+        i = 1
+        for v in in_list:
+            tk.Checkbutton(result_window, text=v, variable = in_list[v]).grid(row=i, column = 1, sticky=tk.W)
+            i += 1
+
+        if i > last_row:
+            last_row = i
+
+        def show_result():
+            out_l = []
+            in_l = []
+
+            print("start from:")
+            for v in out_list:
+                if out_list[v].get() == 1:
+                    out_l.append(v + "(out)")
+            print(out_l)
+            print("to:")
+            for v in in_list:
+                if in_list[v].get() == 1:
+                    in_l.append(v + "(in)")
+            print(in_l)
+
+            queue_time = []
+            records = open("traffic_record2", "r") 
+            for line in records:
+                recs = line.split(",")
+                start_time = -1
+                end_time = -1
+                for rec in recs:
+                    if rec != "\n":
+                        module = rec.split(":")[0]
+                        time = float(rec.split(":")[1])
+                        if module in out_l:
+                            start_time = time
+                        
+                        if module in in_l:
+                            end_time = time
+                        
+                        if start_time > 0 and end_time > 0:
+                            queue_time.append(end_time - start_time)
+                            break
+
+            plt.figure()
+            plt.hist(queue_time)
+            plt.ylabel("users",size=12)
+            plt.xlabel("waiting time",size=12)
+            plt.pause(1)
+
+
+        tk.Button(result_window, text="submit",command = show_result).grid(row = last_row,column = 0, columnspan = 2)
+
+            # start_time = float(rec[0].split(":")[1])
+            # end_time = float(rec[-2].split(":")[1])
+            # wating_time = end_time - start_time
+
+        # print(sum(Q1)/len(Q1),sum(Q2)/len(Q2))
+        # print(len(Q1),len(Q2))
+
+        
