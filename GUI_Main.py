@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import tkinter.filedialog
 import pickle
 import matplotlib.pyplot as plt
 
@@ -120,6 +121,7 @@ class guiMain(tk.Frame):
 
             for Id in modules:
                 x,y = modules[Id].pos
+                print(modules[Id].moduleType)
                 if modules[Id].moduleType == 'Src':
                     eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='mediumspringgreen',tags=('module','Src'))
                     self.modules[eId] = modules[Id]
@@ -136,7 +138,7 @@ class guiMain(tk.Frame):
                     self.modules[eId].eId = eId
 
                 elif modules[Id].moduleType == 'Junc':
-                    eId.moduleType = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='salmon',tags=('module','Junc'))
+                    eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='salmon',tags=('module','Junc'))
                     self.modules[eId] = modules[Id]
                     self.modules[eId].eId = eId
                 module_match[Id] = eId

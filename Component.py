@@ -253,7 +253,7 @@ class Junction(Component_Template):
 
         self.Id = Junction.count
         self.Name = "junction" + str(self.Id)
-        self.moduleType = "๋Junc"
+        self.moduleType = "Junc"
 
         self.num_out = 1
         self.num_in = 99
