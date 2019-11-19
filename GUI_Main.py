@@ -140,6 +140,7 @@ class guiMain(tk.Frame):
                     self.modules[eId] = modules[Id]
                     self.modules[eId].eId = eId
                 module_match[Id] = eId
+                print(eId,Id)
                 self.modules[eId].in_port = []
                 self.modules[eId].out_port = []
                 
@@ -154,7 +155,7 @@ class guiMain(tk.Frame):
                 pos_dst = self.workSpace.coords(dst)
                 pos2 = (pos_dst[0],(pos_dst[1]+pos_dst[3])/2)
                 lId = self.workSpace.create_line(pos1[0],pos1[1],pos2[0],pos2[1],tags=('Line'),arrow=tk.LAST, width=2)
-                self.lines[lId] = line
+                self.lines[lId] = [src,dst]
 
                 self.modules[src].out_port.append((lId,self.modules[src],self.modules[dst]))
                 self.modules[dst].in_port.append((lId,self.modules[src],self.modules[dst]))
