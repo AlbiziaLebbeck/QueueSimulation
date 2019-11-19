@@ -1,9 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
+import pickle
 import matplotlib.pyplot as plt
 
 import Component
 import Simulation
+import numpy as np
 
 class guiMain(tk.Frame):
     def __init__(self,root):
@@ -25,23 +27,29 @@ class guiMain(tk.Frame):
         self.Menu = tk.Frame(self.root,borderwidth=2,relief=tk.RIDGE)
         self.Menu.place(x=0,y=0,height=50,width=1023)
 
-        self.btRun = tk.Button(self.Menu,text='Run',command=self.run)
+        self.btRun = tk.Button(self.Menu,text='Save',command=self.save)
         self.btRun.place(x=0,y=0,height=46,width=49)
 
-        self.btStop = tk.Button(self.Menu,text='Stop',command=self.stop)
+        self.btStop = tk.Button(self.Menu,text='Load',command=self.load)
         self.btStop.place(x=50,y=0,height=46,width=49)
+
+        self.btRun = tk.Button(self.Menu,text='Run',command=self.run)
+        self.btRun.place(x=120,y=0,height=46,width=49)
+
+        self.btStop = tk.Button(self.Menu,text='Stop',command=self.stop)
+        self.btStop.place(x=170,y=0,height=46,width=49)
 
         self.timeVar = tk.StringVar()
         self.labelTime = tk.Label(self.Menu,text="Simulation time : ")
-        self.labelTime.place(x=110,y=3,height=40,width=100)
+        self.labelTime.place(x=230,y=3,height=40,width=100)
         self.textTime = tk.Entry(self.Menu,bd = 3,textvariable=self.timeVar)
-        self.textTime.place(x=210,y=3,height=40,width=50)
+        self.textTime.place(x=330,y=3,height=40,width=50)
         self.labelUnit = tk.Label(self.Menu,text="s")
-        self.labelUnit.place(x=260,y=3,height=40,width=20)
+        self.labelUnit.place(x=380,y=3,height=40,width=20)
         self.timeVar.set("10000")
 
         self.btResult = tk.Button(self.Menu,text='Result',command=self.result)
-        self.btResult.place(x=300,y=0,height=46,width=49)
+        self.btResult.place(x=420,y=0,height=46,width=49)
 
         self.runSim = True
 
@@ -80,6 +88,78 @@ class guiMain(tk.Frame):
 
         self.sim = Simulation.simulation(self)
 
+##########################################################
+#######                    Save                    #######
+##########################################################
+
+    def save(self):
+        directory = tk.filedialog.asksaveasfilename(filetypes = (("qsim files","*.qs"),),defaultextension='.qs')
+        with open(directory, 'wb') as file_object:
+            pickle.dump(self.modules, file_object)
+            pickle.dump(self.lines, file_object)
+
+##########################################################
+#######                    Load                    #######
+##########################################################
+
+    def load(self):
+        directory = tk.filedialog.askopenfilename(filetypes = (("qsim files","*.qs"),),defaultextension='.qs')
+        with open(directory, 'rb') as file_object:
+            modules = pickle.load(file_object)
+            lines = pickle.load(file_object)
+            self.modules = {}
+            self.lines = {}
+
+            module_match = {}
+
+            self.workSpace.delete('all')
+            for col in range(1,1023//(self.gridsize*10)):
+                self.workSpace.create_line(col*self.gridsize*10,0,col*self.gridsize*10,717,tags=('grid'),fill='lightgray')
+            for row in range(1,717//(self.gridsize*10)):
+                self.workSpace.create_line(0,row*self.gridsize*10,1023,row*self.gridsize*10,tags=('grid'),fill='lightgray')
+
+            for Id in modules:
+                x,y = modules[Id].pos
+                if modules[Id].moduleType == 'Src':
+                    eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='mediumspringgreen',tags=('module','Src'))
+                    self.modules[eId] = modules[Id]
+                    self.modules[eId].eId = eId
+
+                elif modules[Id].moduleType == 'Serv':
+                    eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='deepskyblue',tags=('module','Serv'))
+                    self.modules[eId] = modules[Id]
+                    self.modules[eId].eId = eId
+
+                elif modules[Id].moduleType == 'Sw':
+                    eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='gold',tags=('module','Sw'))
+                    self.modules[eId] = modules[Id]
+                    self.modules[eId].eId = eId
+
+                elif modules[Id].moduleType == 'Junc':
+                    eId.moduleType = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='salmon',tags=('module','Junc'))
+                    self.modules[eId] = modules[Id]
+                    self.modules[eId].eId = eId
+                module_match[Id] = eId
+                self.modules[eId].in_port = []
+                self.modules[eId].out_port = []
+                
+                tEId = self.workSpace.create_text(x,y+30,text=self.modules[eId].Name,anchor=tk.CENTER)
+                self.modules[eId].tEId = tEId
+            
+            for line in lines.values():
+                src = module_match[line[0]]
+                pos_src = self.workSpace.coords(src)
+                pos1 = (pos_src[2],(pos_src[1]+pos_src[3])/2)
+                dst = module_match[line[1]]
+                pos_dst = self.workSpace.coords(dst)
+                pos2 = (pos_dst[0],(pos_dst[1]+pos_dst[3])/2)
+                lId = self.workSpace.create_line(pos1[0],pos1[1],pos2[0],pos2[1],tags=('Line'),arrow=tk.LAST, width=2)
+                self.lines[lId] = line
+
+                self.modules[src].out_port.append((lId,self.modules[src],self.modules[dst]))
+                self.modules[dst].in_port.append((lId,self.modules[src],self.modules[dst]))
+
+            self.sim = Simulation.simulation(self)
 
 ##########################################################
 #######            Creat New Component             #######
@@ -382,7 +462,7 @@ class guiMain(tk.Frame):
         result_window = tk.Toplevel()
         result_window.title("Results")
 
-        records = open("traffic_record2", "r") 
+        records = open("traffic_record", "r") 
 
         in_list = {}
         out_list = {}
@@ -432,7 +512,7 @@ class guiMain(tk.Frame):
             print(in_l)
 
             queue_time = []
-            records = open("traffic_record2", "r") 
+            records = open("traffic_record", "r") 
             for line in records:
                 recs = line.split(",")
                 start_time = -1
@@ -450,11 +530,19 @@ class guiMain(tk.Frame):
                         if start_time > 0 and end_time > 0:
                             queue_time.append(end_time - start_time)
                             break
+            
+            mean = np.mean(queue_time)
+            std = np.std(queue_time)
+            print(mean,std)
 
             plt.figure()
-            plt.hist(queue_time)
+            plt.hist(queue_time,20)
+            plt.axvline(x=mean, color='#2cf02c')
+            plt.axvline(x=mean-std, ls = "--", color='#2ca02c', alpha=0.7)
+            plt.axvline(x=mean+std, ls = "--", color='#2ca02c', alpha=0.7)
             plt.ylabel("users",size=12)
             plt.xlabel("waiting time",size=12)
+            plt.title('Histogram of Service Time: Average='+("%.2f" % mean)+'s, STD='+("%.2f" % std)+'s')
             plt.pause(1)
 
 
