@@ -338,7 +338,8 @@ class guiMain(tk.Frame):
             for l in line:
                 dst = self.lines[l[0]][1]
                 for i,j in enumerate(self.modules[dst].in_port):
-                    self.modules[dst].in_port.pop(i)
+                    if j[0] == l[0]:
+                        self.modules[dst].in_port.pop(i)
 
                 self.workSpace.delete(l[0])
                 del self.lines[l[0]]
@@ -347,7 +348,8 @@ class guiMain(tk.Frame):
             for l in line:
                 src = self.lines[l[0]][0]
                 for i,j in enumerate(self.modules[src].out_port):
-                    self.modules[src].out_port.pop(i)
+                    if j[0] == l[0]:
+                        self.modules[src].out_port.pop(i)
                 
                 self.workSpace.delete(l[0])
                 del self.lines[l[0]]
@@ -545,7 +547,7 @@ class guiMain(tk.Frame):
             plt.axvline(x=mean+std, ls = "--", color='#2ca02c', alpha=0.7)
             plt.ylabel("users",size=12)
             plt.xlabel("waiting time",size=12)
-            plt.title('Histogram of Service Time: Average='+("%.2f" % mean)+'s, STD='+("%.2f" % std)+'s')
+            plt.title('Histogram of Service Time: Average='+("%.2f" % mean)+'s, SD='+("%.2f" % std)+'s')
             plt.pause(1)
 
 
