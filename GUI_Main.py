@@ -61,7 +61,7 @@ class guiMain(tk.Frame):
         self.btSrc = tk.Button(self.moduleMenu,text='Source',command=self.create_src)
         self.btSrc.place(x=0,y=0,height=75,width=146)
 
-        self.btQueue = tk.Button(self.moduleMenu,text='Server',command=self.create_queue)
+        self.btQueue = tk.Button(self.moduleMenu,text='Ticket Machine',command=self.create_queue)
         self.btQueue.place(x=0,y=75,height=75,width=146)
 
         self.btSwitch = tk.Button(self.moduleMenu,text='Switch',command=self.create_switch)
@@ -338,7 +338,8 @@ class guiMain(tk.Frame):
             for l in line:
                 dst = self.lines[l[0]][1]
                 for i,j in enumerate(self.modules[dst].in_port):
-                    self.modules[dst].in_port.pop(i)
+                    if j[0] == l[0]:
+                        self.modules[dst].in_port.pop(i)
 
                 self.workSpace.delete(l[0])
                 del self.lines[l[0]]
@@ -347,7 +348,8 @@ class guiMain(tk.Frame):
             for l in line:
                 src = self.lines[l[0]][0]
                 for i,j in enumerate(self.modules[src].out_port):
-                    self.modules[src].out_port.pop(i)
+                    if j[0] == l[0]:
+                        self.modules[src].out_port.pop(i)
                 
                 self.workSpace.delete(l[0])
                 del self.lines[l[0]]
