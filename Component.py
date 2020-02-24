@@ -93,7 +93,7 @@ class Server(Component_Template):
 
         self.deprate = 0.1
 
-        self.isPlot = False
+        self.isPlot = True
 
     def init_run(self):
 
@@ -180,7 +180,7 @@ class Switch(Component_Template):
         self.tEId = 0
         self.pos = pos
 
-        self.isPlot = False
+        self.isPlot = True
 
     def init_run(self):
 

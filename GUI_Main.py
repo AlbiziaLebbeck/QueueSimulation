@@ -41,7 +41,7 @@ class guiMain(tk.Frame):
         self.btStop.place(x=170,y=0,height=46,width=49)
 
         self.timeVar = tk.StringVar()
-        self.labelTime = tk.Label(self.Menu,text="Simulation time : ")
+        self.labelTime = tk.Label(self.Menu,text="Simulation time:")
         self.labelTime.place(x=230,y=3,height=40,width=100)
         self.textTime = tk.Entry(self.Menu,bd = 3,textvariable=self.timeVar)
         self.textTime.place(x=330,y=3,height=40,width=50)
@@ -51,6 +51,13 @@ class guiMain(tk.Frame):
 
         self.btResult = tk.Button(self.Menu,text='Result',command=self.result)
         self.btResult.place(x=420,y=0,height=46,width=49)
+
+        self.labelMode = tk.Label(self.Menu,text="Mode:")
+        self.labelMode.place(x=480,y=3,height=40,width=50)
+        self.modeVar = tk.StringVar()
+        self.optionMode = tk.OptionMenu(self.Menu, self.modeVar, "Standalone", "Comparison", command=self.setMode)
+        self.modeVar.set("Standalone")
+        self.optionMode.place(x=530,y=0,height=46,width=110)
 
         self.runSim = True
 
@@ -73,8 +80,8 @@ class guiMain(tk.Frame):
         self.btLine = tk.Button(self.moduleMenu,text='Link',command=self.create_line)
         self.btLine.place(x=0,y=300,height=75,width=146)
 
-        self.workSpace = tk.Canvas(self.root, width=1023, height=717,background='white')
-        self.workSpace.place(x=150,y=50, width=873, height=717)
+        self.workSpace = tk.Canvas(self.root, width=1023, height=700,background='white')
+        self.workSpace.place(x=150,y=50, width=873, height=700)
         self.workSpace.bind("<Button-3>",lambda e: self.rightClick(e))
         self.gridsize = 5
         for col in range(1,1023//(self.gridsize*10)):
@@ -88,6 +95,30 @@ class guiMain(tk.Frame):
         self.select_object = -1
 
         self.sim = Simulation.simulation(self)
+
+        self.mode = "Standalone"
+
+
+##########################################################
+#######                  Set Mode                  #######
+##########################################################
+
+    def setMode(self, val):
+        self.mode = val
+
+        self.modules = {}
+        self.lines = {}
+
+        self.workSpace.delete('all')
+
+        for col in range(1,1023//(self.gridsize*10)):
+                self.workSpace.create_line(col*self.gridsize*10,0,col*self.gridsize*10,717,tags=('grid'),fill='lightgray')
+        for row in range(1,717//(self.gridsize*10)):
+            self.workSpace.create_line(0,row*self.gridsize*10,1023,row*self.gridsize*10,tags=('grid'),fill='lightgray')
+
+        if self.mode == "Comparison":
+            self.workSpace.create_line(0,7*self.gridsize*10,1023,7*self.gridsize*10,tags=('grid'),fill='gray',width=4,dash=(3,5))
+
 
 ##########################################################
 #######                    Save                    #######
@@ -195,7 +226,20 @@ class guiMain(tk.Frame):
         if module == 'Src':
             eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='mediumspringgreen',tags=('module','Src'))
             self.modules[eId] = Component.Source(eId,[x,y])
+            print(eId)
+
+            if self.mode == "Comparison":
+                tEId = self.workSpace.create_text(x,y+30,text=self.modules[eId].Name,anchor=tk.CENTER)
+                self.modules[eId].tEId = tEId
+                seed = eId
+                self.modules[eId].seed = seed
+                y += 350
+                eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='mediumspringgreen',tags=('module','Src'))
+                self.modules[eId] = Component.Source(eId,[x,y])
+                self.modules[eId].seed = seed
+            
             self.btSrc.config(relief=tk.RAISED)
+
 
         elif module == 'Serv':
             eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='deepskyblue',tags=('module','Serv'))
@@ -447,6 +491,7 @@ class guiMain(tk.Frame):
             plotVar = tk.BooleanVar()
             plotCheck = tk.Checkbutton(plotFrame, variable=plotVar)
             plotCheck.pack(fill=tk.X,padx=5,expand=True)
+            plotCheck.toggle()
 
         elif module.moduleType == 'Sw':
             plotFrame = tk.Frame(propWin)
@@ -501,7 +546,11 @@ class guiMain(tk.Frame):
             time = 100000000
         self.sim.setup(time,False)
 
+        for l in self.lines:
+            self.workSpace.itemconfigure(l, state = tk.HIDDEN)
         self.sim.run()
+        for l in self.lines:
+            self.workSpace.itemconfigure(l, state = tk.NORMAL)
 
         self.result()
 

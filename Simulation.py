@@ -21,6 +21,7 @@ class simulation():
             self.workSpace.delete(p.eId)
         self.people = []
 
+        self.modules = self.guiObj.modules
         for m in self.modules:
             self.modules[m].init_run()
 
@@ -32,6 +33,7 @@ class simulation():
 
         servInf = {}
 
+        print(self.modules)
         for m in self.modules:
             if self.modules[m].moduleType == "Serv" or self.modules[m].moduleType == "Sw":
                 if self.modules[m].isPlot:
