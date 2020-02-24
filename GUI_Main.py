@@ -591,7 +591,7 @@ class guiMain(tk.Frame):
             plt.axvline(x=mean+std, ls = "--", color='#2ca02c', alpha=0.7)
             plt.ylabel("users",size=12)
             plt.xlabel("waiting time",size=12)
-            plt.title('Histogram of Service Time: Average='+("%.2f" % mean)+'s, STD='+("%.2f" % std)+'s')
+            plt.title('Histogram of Service Time: Average='+("%.2f" % mean)+'s, SD='+("%.2f" % std)+'s')
             plt.pause(1)
 
 
