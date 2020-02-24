@@ -1,3 +1,7 @@
+import tkinter as tk
+from tkinter import ttk
+from Information import Information
+
 class simulation():
     
     def __init__(self,guiObj):
@@ -23,7 +27,21 @@ class simulation():
     def run(self):
 
         record = open("traffic_record","w")
-        
+
+        showPlot = False
+
+        servInf = {}
+
+        for m in self.modules:
+            if self.modules[m].moduleType == "Serv" or self.modules[m].moduleType == "Sw":
+                if self.modules[m].isPlot:
+                    if not showPlot:
+                        informationWin = tk.Toplevel()
+                        informationWin.title("Information")
+                        showPlot = True
+                    name = self.modules[m].Name
+                    servInf[name] = Information(informationWin, name)
+
         while self.sysTime <= self.simTime and self.guiObj.runSim:
             
             if self.debug:
@@ -48,6 +66,18 @@ class simulation():
                     rl += "\n"
                     record.write(rl)
                     self.people.remove(pout[1])
+
+                if self.modules[m].moduleType == "Serv" or self.modules[m].moduleType == "Sw":
+                    if self.modules[m].isPlot:
+                        qLen = len(self.modules[m].queue[0])
+                        if pout[1] != None:
+                            qTime = pout[1].time[-2][1] - pout[1].time[-3][1] 
+                            servTime = pout[1].time[-1][1] - pout[1].time[-2][1] 
+                        else:
+                            qTime = None
+                            servTime = None
+
+                        servInf[self.modules[m].Name].update(qTime, qLen, servTime)
             
             self.updateGui()
 

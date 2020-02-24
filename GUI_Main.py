@@ -61,7 +61,7 @@ class guiMain(tk.Frame):
         self.btSrc = tk.Button(self.moduleMenu,text='Source',command=self.create_src)
         self.btSrc.place(x=0,y=0,height=75,width=146)
 
-        self.btQueue = tk.Button(self.moduleMenu,text='Ticket Machine',command=self.create_queue)
+        self.btQueue = tk.Button(self.moduleMenu,text='Ticket Machine',command=self.create_server)
         self.btQueue.place(x=0,y=75,height=75,width=146)
 
         self.btSwitch = tk.Button(self.moduleMenu,text='Switch',command=self.create_switch)
@@ -173,7 +173,7 @@ class guiMain(tk.Frame):
         self.workSpace.bind("<Button-1>",lambda e: self.add_item(e,'Src'))
     
 
-    def create_queue(self):
+    def create_server(self):
         self.btQueue.config(relief=tk.SUNKEN)
         self.workSpace.bind("<Button-1>",lambda e: self.add_item(e,'Serv'))
 
@@ -391,6 +391,7 @@ class guiMain(tk.Frame):
         if module.moduleType == 'Src':
             arrFrame = tk.Frame(propWin)
             arrFrame.pack(fill=tk.X)
+
             arrLabel = tk.Label(arrFrame,text='Arrival rate',width=14)
             arrLabel.pack(side=tk.LEFT,padx=5,pady=5)
             arrVar = tk.StringVar()
@@ -408,6 +409,28 @@ class guiMain(tk.Frame):
             seedEntry.pack(fill=tk.X,padx=5,expand=True)
 
         elif module.moduleType == 'Serv':
+
+            def setDep(val):
+                if val == "custom":
+                    depEntry.config(state='normal')
+                else:
+                    depEntry.config(state='disabled')
+                if val == "BTS":
+                    depVar.set("0.024")
+                elif val == "MRT":
+                    depVar.set("0.022")
+                elif val == "ARL":
+                    depVar.set("0.034")
+
+            typeFrame = tk.Frame(propWin)
+            typeFrame.pack(fill=tk.X)
+            typeLabel = tk.Label(typeFrame,text='Type',width=14)
+            typeLabel.pack(side=tk.LEFT,padx=5,pady=5)
+            typeVar = tk.StringVar()
+            typeOption = tk.OptionMenu(typeFrame, typeVar, "custom", "BTS", "MRT", "ARL", command=setDep)
+            typeVar.set("general")
+            typeOption.pack(fill=tk.X,padx=5,expand=True)
+
             depFrame = tk.Frame(propWin)
             depFrame.pack(fill=tk.X)
             depLabel = tk.Label(depFrame,text='Service rate',width=14)
@@ -416,6 +439,24 @@ class guiMain(tk.Frame):
             depEntry = tk.Entry(depFrame,textvariable=depVar)
             depVar.set(str(module.deprate))
             depEntry.pack(fill=tk.X,padx=5,expand=True)
+
+            plotFrame = tk.Frame(propWin)
+            plotFrame.pack(fill=tk.X)
+            plotLabel = tk.Label(plotFrame,text='Plot',width=14)
+            plotLabel.pack(side=tk.LEFT,padx=5,pady=5)
+            plotVar = tk.BooleanVar()
+            plotCheck = tk.Checkbutton(plotFrame, variable=plotVar)
+            plotCheck.pack(fill=tk.X,padx=5,expand=True)
+
+        elif module.moduleType == 'Sw':
+            plotFrame = tk.Frame(propWin)
+            plotFrame.pack(fill=tk.X)
+            plotLabel = tk.Label(plotFrame,text='Plot',width=14)
+            plotLabel.pack(side=tk.LEFT,padx=5,pady=5)
+            plotVar = tk.BooleanVar()
+            plotCheck = tk.Checkbutton(plotFrame, variable=plotVar)
+            plotCheck.pack(fill=tk.X,padx=5,expand=True)
+            plotCheck.toggle()
         
         def setProp():
             if module.moduleType == 'Src':
@@ -425,6 +466,9 @@ class guiMain(tk.Frame):
             elif module.moduleType == 'Serv':
                 module.Name = nameVar.get()
                 module.deprate = float(depVar.get())
+                module.isPlot = plotVar.get()
+            elif module.moduleType == 'Sw':
+                module.isPlot = plotVar.get()
             self.workSpace.itemconfig(self.modules[self.select_object].tEId,text=nameVar.get())
             propWin.destroy()
 

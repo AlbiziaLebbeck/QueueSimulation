@@ -81,7 +81,7 @@ class Server(Component_Template):
         Server.count += 1
 
         self.Id = Server.count
-        self.Name = "server" + str(self.Id)
+        self.Name = "Machine" + str(self.Id)
         self.moduleType = "Serv"
 
         self.num_out = 1
@@ -92,6 +92,8 @@ class Server(Component_Template):
         self.pos = pos
 
         self.deprate = 0.1
+
+        self.isPlot = False
 
     def init_run(self):
 
@@ -177,6 +179,8 @@ class Switch(Component_Template):
         self.eId = eId
         self.tEId = 0
         self.pos = pos
+
+        self.isPlot = False
 
     def init_run(self):
 
