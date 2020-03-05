@@ -188,7 +188,7 @@ class simulation():
         # # plt.axvline(x=mean-std, ls = "--", color='#2ca02c', alpha=0.7)
         # # plt.axvline(x=mean+std, ls = "--", color='#2ca02c', alpha=0.7)
         ax.set_ylabel("Number of customers",size=10)
-        ax.set_xlabel("Total time spent by the customer(s)",size=9)
+        ax.set_xlabel("Total time spent by the customer (s)",size=9)
         ax.set_title('Histogram of total time spent by the customer',size=9)
         ax.legend(fontsize=8,loc=1)
         ax.grid()
