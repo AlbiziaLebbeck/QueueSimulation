@@ -52,10 +52,10 @@ class simulation():
                         groupInf[group] = Information(informationWin, group)
         
         numGroup = len(groupInf)
-        informationWin.geometry("700x400")
+        informationWin.geometry("750x400")
         fig = plt.figure()
         canvas = FigureCanvasTkAgg(fig, informationWin)
-        canvas.get_tk_widget().place(x=200, y=0, width=500, height= 400,anchor=tk.NW)
+        canvas.get_tk_widget().place(x=250, y=0, width=500, height= 400,anchor=tk.NW)
 
         ax = fig.add_subplot(1,1,1)
         ax.set_title("Traffic graph", fontsize=12)
@@ -64,7 +64,7 @@ class simulation():
         ax.set_ylabel("Number of customers")
         # ax.set_xticklabels([])
         for group in groupInf:
-            groupInf[group].line, = ax.step([i for i in range(300)], groupInf[group].plotY, where='post', label=groupInf[group].name)
+            groupInf[group].line, = ax.step([i for i in range(300)], groupInf[group].plotY, alpha=0.7, where='post', label=groupInf[group].name)
         ax.legend(loc=1)
         ax.grid()
         fig.tight_layout()
@@ -176,14 +176,14 @@ class simulation():
         ax.set_title("Traffic graph", size=10)
         ax.set_xlabel("Time (s)",size=9)
         ax.set_ylabel("Number of customers",size=9)
-        ax.step([i for i in range(len(groupInf[1].data))], groupInf[1].data, where='post', label=groupInf[1].name)
-        ax.step([i for i in range(len(groupInf[1].data))], groupInf[2].data, where='post', label=groupInf[2].name)
+        for group in groupInf:
+            ax.step([i for i in range(len(groupInf[group].data))], groupInf[group].data, alpha=0.7, where='post', label=groupInf[group].name)
         ax.legend(fontsize=8,loc=1)
         ax.grid()
 
         ax = fig.add_subplot(2,1,2)
-        ax.hist(queue_time[0],40, alpha=0.5, label='Group 1')
-        ax.hist(queue_time[1],40, alpha=0.5, label='Group 2')
+        for group in groupInf:
+            ax.hist(queue_time[group-1],40, alpha=0.5, label=groupInf[group].name)
         # # plt.axvline(x=mean, color='#2cf02c')
         # # plt.axvline(x=mean-std, ls = "--", color='#2ca02c', alpha=0.7)
         # # plt.axvline(x=mean+std, ls = "--", color='#2ca02c', alpha=0.7)
