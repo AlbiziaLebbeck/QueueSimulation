@@ -263,6 +263,9 @@ class guiMain(tk.Frame):
             self.modules[eId] = Component.Switch(eId,[x,y])
             self.btSwitch.config(relief=tk.RAISED)
 
+            if self.mode == "Comparison" and y > 350:
+                self.modules[eId].group = 2
+
         elif module == 'Junc':
             eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='salmon',tags=('module','Junc'))
             self.modules[eId] = Component.Junction(eId,[x,y])

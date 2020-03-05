@@ -8,6 +8,8 @@ import matplotlib.animation as animation
 
 class Information:
 
+    count = 0
+
     def __init__(self, informationWin, group):
 
         self.name = "Group "+str(group)
@@ -42,6 +44,7 @@ class Information:
         self.totalTimeLabel.pack(pady=5)
         self.numPeopleLabel.pack(pady=5)
 
+        # if Information.count == 0:
         fig = plt.figure()
         self.canvas = FigureCanvasTkAgg(fig, frame)
 

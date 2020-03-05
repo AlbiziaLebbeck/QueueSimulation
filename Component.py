@@ -185,6 +185,8 @@ class Switch(Component_Template):
 
         self.isPlot = True
 
+        self.group = 1
+
     def init_run(self):
 
         self.onService = False
