@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.filedialog
 import pickle
-import matplotlib.pyplot as plt
 
 import Component
 import Simulation
@@ -47,7 +46,7 @@ class guiMain(tk.Frame):
         self.textTime.place(x=330,y=3,height=40,width=50)
         self.labelUnit = tk.Label(self.Menu,text="s")
         self.labelUnit.place(x=380,y=3,height=40,width=20)
-        self.timeVar.set("600")
+        self.timeVar.set("1000")
 
         # self.btResult = tk.Button(self.Menu,text='Result',command=self.result)
         # self.btResult.place(x=420,y=0,height=46,width=49)
@@ -446,36 +445,37 @@ class guiMain(tk.Frame):
         propWin = tk.Toplevel()
         module = self.modules[self.select_object]
         propWin.title("Properties: " + module.Name)
+        # propWin.geometry("500x400")
         # mainFrame = Frame(propWin)
         # mainFrame.pack(side=TOP)
-        nameFrame = tk.Frame(propWin)
+        nameFrame = tk.Frame(propWin, width=200, height=25)
         nameFrame.pack(fill=tk.X)
         nameLabel = tk.Label(nameFrame,text='Name',width=14)
-        nameLabel.pack(side=tk.LEFT,padx=5,pady=5)
+        nameLabel.place(relx=0.02, rely=0.05, relwidth=0.6, relheight= 0.95, anchor=tk.NW)
         nameVar = tk.StringVar()
         nameEntry = tk.Entry(nameFrame,textvariable=nameVar)
         nameVar.set(module.Name)
-        nameEntry.pack(fill=tk.X,padx=5,expand=True)
+        nameEntry.place(relx=0.66, rely=0.05, relwidth=0.3, relheight= 0.95, anchor=tk.NW)
 
         if module.moduleType == 'Src':
-            arrFrame = tk.Frame(propWin)
+            arrFrame = tk.Frame(propWin, width=200, height=25)
             arrFrame.pack(fill=tk.X)
 
-            arrLabel = tk.Label(arrFrame,text='Arrival rate',width=14)
-            arrLabel.pack(side=tk.LEFT,padx=5,pady=5)
+            arrLabel = tk.Label(arrFrame,text='Arrival rate(person/s)',width=14)
+            arrLabel.place(relx=0.02, rely=0.05, relwidth=0.6, relheight= 0.95, anchor=tk.NW)
             arrVar = tk.StringVar()
             arrEntry = tk.Entry(arrFrame,textvariable=arrVar)
             arrVar.set(str(module.arrivrate))
-            arrEntry.pack(fill=tk.X,padx=5,expand=True)
+            arrEntry.place(relx=0.66, rely=0.05, relwidth=0.3, relheight= 0.95, anchor=tk.NW)
             
-            seedFrame = tk.Frame(propWin)
+            seedFrame = tk.Frame(propWin, width=200, height=25)
             seedFrame.pack(fill=tk.X)
             seedLabel = tk.Label(seedFrame,text='Seed',width=14)
-            seedLabel.pack(side=tk.LEFT,padx=5,pady=5)
+            seedLabel.place(relx=0.02, rely=0.05, relwidth=0.6, relheight= 0.95, anchor=tk.NW)
             seedVar = tk.StringVar()
             seedEntry = tk.Entry(seedFrame,textvariable=seedVar)
             seedVar.set(str(module.seed))
-            seedEntry.pack(fill=tk.X,padx=5,expand=True)
+            seedEntry.place(relx=0.66, rely=0.05, relwidth=0.3, relheight= 0.95, anchor=tk.NW)
 
         elif module.moduleType == 'Serv':
 
@@ -484,38 +484,40 @@ class guiMain(tk.Frame):
                     depEntry.config(state='normal')
                 else:
                     depEntry.config(state='disabled')
-                if val == "BTS":
+                if val == "BTS A":
                     depVar.set("0.024")
+                elif val == "BTS B":
+                    depVar.set("0.032")
                 elif val == "MRT":
                     depVar.set("0.022")
                 elif val == "ARL":
                     depVar.set("0.034")
 
-            typeFrame = tk.Frame(propWin)
+            typeFrame = tk.Frame(propWin, width=200, height=25)
             typeFrame.pack(fill=tk.X)
             typeLabel = tk.Label(typeFrame,text='Type',width=14)
-            typeLabel.pack(side=tk.LEFT,padx=5,pady=5)
+            typeLabel.place(relx=0.02, rely=0.05, relwidth=0.5, relheight= 0.95, anchor=tk.NW)
             typeVar = tk.StringVar()
-            typeOption = tk.OptionMenu(typeFrame, typeVar, "custom", "BTS", "MRT", "ARL", command=setDep)
-            typeVar.set("general")
-            typeOption.pack(fill=tk.X,padx=5,expand=True)
+            typeOption = tk.OptionMenu(typeFrame, typeVar, "custom", "BTS A", "BTS B", "MRT", "ARL", command=setDep)
+            typeVar.set("custom")
+            typeOption.place(relx=0.56, rely=0.05, relwidth=0.4, relheight= 0.95, anchor=tk.NW)
 
-            depFrame = tk.Frame(propWin)
+            depFrame = tk.Frame(propWin, width=200, height=25)
             depFrame.pack(fill=tk.X)
-            depLabel = tk.Label(depFrame,text='Service rate',width=14)
-            depLabel.pack(side=tk.LEFT,padx=5,pady=5)
+            depLabel = tk.Label(depFrame,text='Service rate(person/s)',width=14)
+            depLabel.place(relx=0.02, rely=0.05, relwidth=0.6, relheight= 0.95, anchor=tk.NW)
             depVar = tk.StringVar()
             depEntry = tk.Entry(depFrame,textvariable=depVar)
             depVar.set(str(module.deprate))
-            depEntry.pack(fill=tk.X,padx=5,expand=True)
+            depEntry.place(relx=0.66, rely=0.05, relwidth=0.3, relheight= 0.95, anchor=tk.NW)
 
-            plotFrame = tk.Frame(propWin)
+            plotFrame = tk.Frame(propWin, width=200, height=25)
             plotFrame.pack(fill=tk.X)
             plotLabel = tk.Label(plotFrame,text='Plot',width=14)
-            plotLabel.pack(side=tk.LEFT,padx=5,pady=5)
+            plotLabel.place(relx=0.02, rely=0.05, relwidth=0.6, relheight= 0.95, anchor=tk.NW)
             plotVar = tk.BooleanVar()
             plotCheck = tk.Checkbutton(plotFrame, variable=plotVar)
-            plotCheck.pack(fill=tk.X,padx=5,expand=True)
+            plotCheck.place(relx=0.66, rely=0.05, relwidth=0.3, relheight= 0.95, anchor=tk.NW)
             plotCheck.toggle()
         
         def setProp():
