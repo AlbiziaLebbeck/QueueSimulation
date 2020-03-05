@@ -1,6 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 from Information import Information
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 class simulation():
     
@@ -27,7 +32,7 @@ class simulation():
 
     def run(self):
 
-        record = open("traffic_record","w")
+        # record = open("traffic_record","w")
 
         showPlot = False
 
@@ -45,6 +50,40 @@ class simulation():
                     group = self.modules[m].group
                     if group not in groupInf:
                         groupInf[group] = Information(informationWin, group)
+        
+        numGroup = len(groupInf)
+        informationWin.geometry("700x"+str(200*numGroup))
+        fig = plt.figure()
+        canvas = FigureCanvasTkAgg(fig, informationWin)
+        canvas.get_tk_widget().place(x=200, y=0, width=500, height= 200*numGroup,anchor=tk.NW)
+
+        ax = fig.add_subplot(1,1,1)
+        ax.set_title("Traffic graph", fontsize=12)
+        ax.set_xlim((0,300))
+        ax.set_xlabel("Time (s)")
+        # ax.set_xticklabels([])
+        for group in groupInf:
+            groupInf[group].line, = ax.step([i for i in range(300)], groupInf[group].plotY, where='post', label=groupInf[group].name)
+        ax.legend()
+        ax.grid()
+        fig.tight_layout()
+
+        def animate(i):
+            lines = []
+            maxPlot = []
+            for group in groupInf:
+                maxPlot.append(max(groupInf[group].plotY))
+                groupInf[group].line.set_xdata(groupInf[group].plotX)  # update the data
+                groupInf[group].line.set_ydata(groupInf[group].plotY)  # update the data
+                lines.append(groupInf[group].line)
+            ax.set_xlim((groupInf[group].plotX[0],groupInf[group].plotX[-1]+1))
+            ax.set_ylim((0, max(maxPlot)+2))
+            return lines
+        
+        ani = animation.FuncAnimation(fig, animate, interval=1000)
+
+        t = 0
+
 
         while self.sysTime <= self.simTime and self.guiObj.runSim:
             
@@ -63,13 +102,13 @@ class simulation():
 
                 if pout[0] == 1: 
                     self.people.append(pout[1])
-                elif pout[0] == 2:
-                    rl = ""
-                    for r in pout[1].time:
-                        rl += r[0] + ":" + str(r[1]) + ","
-                    rl += "\n"
-                    record.write(rl)
-                    self.people.remove(pout[1])
+                # elif pout[0] == 2:
+                #     rl = ""
+                #     for r in pout[1].time:
+                #         rl += r[0] + ":" + str(r[1]) + ","
+                #     rl += "\n"
+                #     record.write(rl)
+                #     self.people.remove(pout[1])
 
                 if self.modules[m].moduleType == "Src":
                     if pout[0] == 1: 
@@ -86,19 +125,25 @@ class simulation():
                         groupInf[self.modules[m].group].updateLen(qLen)
                         if pout[0] == 2:
                             if pout[1] != None:
+                                qTime = 0
+                                servTime = 0
                                 for i in range(len(pout[1].time)//2):
-                                    qTime = pout[1].time[-2-i*2][1] - pout[1].time[-3-i*2][1] 
-                                    servTime = pout[1].time[-1-i*2][1] - pout[1].time[-2-i*2][1] 
-                                    groupInf[self.modules[m].group].updateTime(qTime, servTime)
+                                    qTime += pout[1].time[-2-i*2][1] - pout[1].time[-3-i*2][1] 
+                                    servTime += pout[1].time[-1-i*2][1] - pout[1].time[-2-i*2][1] 
                                 
                                 totalTime = pout[1].time[-1][1] - pout[1].time[0][1] 
-                                groupInf[self.modules[m].group].updateTotalTime(totalTime)
+                                groupInf[self.modules[m].group].updateTime(qTime, servTime, totalTime)
+            
+            if t%10 == 0:
+                for group in groupInf:
+                    groupInf[group].updateGraph()
+            t += 1
             
             self.updateGui()
 
             self.sysTime += 0.1
         
-        record.close()
+        # record.close()
 
         self.stop()
 

@@ -47,10 +47,10 @@ class guiMain(tk.Frame):
         self.textTime.place(x=330,y=3,height=40,width=50)
         self.labelUnit = tk.Label(self.Menu,text="s")
         self.labelUnit.place(x=380,y=3,height=40,width=20)
-        self.timeVar.set("10000")
+        self.timeVar.set("600")
 
-        self.btResult = tk.Button(self.Menu,text='Result',command=self.result)
-        self.btResult.place(x=420,y=0,height=46,width=49)
+        # self.btResult = tk.Button(self.Menu,text='Result',command=self.result)
+        # self.btResult.place(x=420,y=0,height=46,width=49)
 
         self.labelMode = tk.Label(self.Menu,text="Mode:")
         self.labelMode.place(x=480,y=3,height=40,width=50)
@@ -150,6 +150,8 @@ class guiMain(tk.Frame):
             for row in range(1,717//(self.gridsize*10)):
                 self.workSpace.create_line(0,row*self.gridsize*10,1023,row*self.gridsize*10,tags=('grid'),fill='lightgray')
 
+            self.mode = "Standalone"
+            self.modeVar.set("Standalone")
             for Id in modules:
                 x,y = modules[Id].pos
                 print(modules[Id].moduleType)
@@ -157,6 +159,9 @@ class guiMain(tk.Frame):
                     eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='mediumspringgreen',tags=('module','Src'))
                     self.modules[eId] = modules[Id]
                     self.modules[eId].eId = eId
+
+                    if self.modules[eId].group == 2:
+                        self.mode = "Comparison"
 
                 elif modules[Id].moduleType == 'Serv':
                     eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='deepskyblue',tags=('module','Serv'))
@@ -179,6 +184,11 @@ class guiMain(tk.Frame):
                 
                 tEId = self.workSpace.create_text(x,y+30,text=self.modules[eId].Name,anchor=tk.CENTER)
                 self.modules[eId].tEId = tEId
+            
+            if self.mode == "Comparison":
+                self.modeVar.set("Comparison")
+                self.workSpace.create_line(0,7*self.gridsize*10,1023,7*self.gridsize*10,tags=('grid'),fill='gray',width=4,dash=(3,5))
+
             
             for line in lines.values():
                 src = module_match[line[0]]
@@ -555,7 +565,7 @@ class guiMain(tk.Frame):
         for l in self.lines:
             self.workSpace.itemconfigure(l, state = tk.NORMAL)
 
-        self.result()
+        # self.result()
 
 
     def result(self):
