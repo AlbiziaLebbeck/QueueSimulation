@@ -233,10 +233,19 @@ class guiMain(tk.Frame):
                 self.modules[eId].tEId = tEId
                 seed = eId
                 self.modules[eId].seed = seed
-                y += 350
+                if y <=350:
+                    self.modules[eId].group = 1
+                    y += 350
+                else:
+                    self.modules[eId].group = 2
+                    y -= 350
                 eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='mediumspringgreen',tags=('module','Src'))
                 self.modules[eId] = Component.Source(eId,[x,y])
                 self.modules[eId].seed = seed
+                if y <=350:
+                    self.modules[eId].group = 1
+                else:
+                    self.modules[eId].group = 2
             
             self.btSrc.config(relief=tk.RAISED)
 
@@ -245,6 +254,9 @@ class guiMain(tk.Frame):
             eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='deepskyblue',tags=('module','Serv'))
             self.modules[eId] = Component.Server(eId,[x,y])
             self.btQueue.config(relief=tk.RAISED)
+
+            if self.mode == "Comparison" and y > 350:
+                self.modules[eId].group = 2
 
         elif module == 'Sw':
             eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='gold',tags=('module','Sw'))
@@ -492,16 +504,6 @@ class guiMain(tk.Frame):
             plotCheck = tk.Checkbutton(plotFrame, variable=plotVar)
             plotCheck.pack(fill=tk.X,padx=5,expand=True)
             plotCheck.toggle()
-
-        elif module.moduleType == 'Sw':
-            plotFrame = tk.Frame(propWin)
-            plotFrame.pack(fill=tk.X)
-            plotLabel = tk.Label(plotFrame,text='Plot',width=14)
-            plotLabel.pack(side=tk.LEFT,padx=5,pady=5)
-            plotVar = tk.BooleanVar()
-            plotCheck = tk.Checkbutton(plotFrame, variable=plotVar)
-            plotCheck.pack(fill=tk.X,padx=5,expand=True)
-            plotCheck.toggle()
         
         def setProp():
             if module.moduleType == 'Src':
@@ -511,8 +513,6 @@ class guiMain(tk.Frame):
             elif module.moduleType == 'Serv':
                 module.Name = nameVar.get()
                 module.deprate = float(depVar.get())
-                module.isPlot = plotVar.get()
-            elif module.moduleType == 'Sw':
                 module.isPlot = plotVar.get()
             self.workSpace.itemconfig(self.modules[self.select_object].tEId,text=nameVar.get())
             propWin.destroy()

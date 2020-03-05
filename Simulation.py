@@ -31,18 +31,20 @@ class simulation():
 
         showPlot = False
 
-        servInf = {}
+        groupInf = {}
 
         print(self.modules)
         for m in self.modules:
-            if self.modules[m].moduleType == "Serv" or self.modules[m].moduleType == "Sw":
+            if self.modules[m].moduleType == "Serv":
                 if self.modules[m].isPlot:
                     if not showPlot:
                         informationWin = tk.Toplevel()
                         informationWin.title("Information")
                         showPlot = True
-                    name = self.modules[m].Name
-                    servInf[name] = Information(informationWin, name)
+                    
+                    group = self.modules[m].group
+                    if group not in groupInf:
+                        groupInf[group] = Information(informationWin, group)
 
         while self.sysTime <= self.simTime and self.guiObj.runSim:
             
@@ -69,17 +71,28 @@ class simulation():
                     record.write(rl)
                     self.people.remove(pout[1])
 
-                if self.modules[m].moduleType == "Serv" or self.modules[m].moduleType == "Sw":
+                if self.modules[m].moduleType == "Src":
+                    if pout[0] == 1: 
+                        groupInf[self.modules[m].group].updatePeople()
+
+                if self.modules[m].moduleType == "Sw":
                     if self.modules[m].isPlot:
                         qLen = len(self.modules[m].queue[0])
-                        if pout[1] != None:
-                            qTime = pout[1].time[-2][1] - pout[1].time[-3][1] 
-                            servTime = pout[1].time[-1][1] - pout[1].time[-2][1] 
-                        else:
-                            qTime = None
-                            servTime = None
+                        groupInf[self.modules[m].group].updateLen(qLen)
 
-                        servInf[self.modules[m].Name].update(qTime, qLen, servTime)
+                if self.modules[m].moduleType == "Serv":
+                    if self.modules[m].isPlot:
+                        qLen = len(self.modules[m].queue[0])
+                        groupInf[self.modules[m].group].updateLen(qLen)
+                        if pout[0] == 2:
+                            if pout[1] != None:
+                                for i in range(len(pout[1].time)//2):
+                                    qTime = pout[1].time[-2-i*2][1] - pout[1].time[-3-i*2][1] 
+                                    servTime = pout[1].time[-1-i*2][1] - pout[1].time[-2-i*2][1] 
+                                    groupInf[self.modules[m].group].updateTime(qTime, servTime)
+                                
+                                totalTime = pout[1].time[-1][1] - pout[1].time[0][1] 
+                                groupInf[self.modules[m].group].updateTotalTime(totalTime)
             
             self.updateGui()
 

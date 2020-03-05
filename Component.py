@@ -36,6 +36,8 @@ class Source(Component_Template):
         self.seed = Source.Count
 
         self.servicePerson = None
+
+        self.group = 1
         
     def init_run(self):
         np.random.seed(seed=self.seed)
@@ -93,6 +95,7 @@ class Server(Component_Template):
 
         self.deprate = 0.1
 
+        self.group = 1
         self.isPlot = True
 
     def init_run(self):
