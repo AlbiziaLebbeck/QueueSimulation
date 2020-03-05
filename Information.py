@@ -46,6 +46,7 @@ class Information:
         self.numPlot = 0
         self.plotX = [i for i in range(300)]
         self.plotY = [0 for i in range(300)]
+        self.data = []
         
         xF.place(relx=0.01, rely=0.05, relwidth=0.98, relheight= 0.93, anchor=tk.NW)
         tk.Label(frame, text=self.name).place(relx=0.03, rely=0.05,anchor=tk.W)
@@ -109,4 +110,6 @@ class Information:
             self.plotX.append(self.plotX[-1]+1)
             self.plotY.pop(0)
             self.plotY.append(self.numPeople-self.numOutPeople)
+            
+        self.data.append(self.numPeople-self.numOutPeople)
         self.numPlot += 1
