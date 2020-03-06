@@ -153,7 +153,7 @@ class guiMain(tk.Frame):
             self.modeVar.set("Standalone")
             for Id in modules:
                 x,y = modules[Id].pos
-                print(modules[Id].moduleType)
+
                 if modules[Id].moduleType == 'Src':
                     eId = self.workSpace.create_rectangle(x-20,y-20,x+20,y+20,fill='mediumspringgreen',tags=('module','Src'))
                     self.modules[eId] = modules[Id]
@@ -180,6 +180,11 @@ class guiMain(tk.Frame):
                 print(eId,Id)
                 self.modules[eId].in_port = []
                 self.modules[eId].out_port = []
+
+                if y > 350:
+                    self.modules[eId].group = 2
+                else:
+                    self.modules[eId].group = 1
                 
                 tEId = self.workSpace.create_text(x,y+30,text=self.modules[eId].Name,anchor=tk.CENTER)
                 self.modules[eId].tEId = tEId
@@ -448,7 +453,7 @@ class guiMain(tk.Frame):
         # propWin.geometry("500x400")
         # mainFrame = Frame(propWin)
         # mainFrame.pack(side=TOP)
-        nameFrame = tk.Frame(propWin, width=200, height=25)
+        nameFrame = tk.Frame(propWin, width=300, height=25)
         nameFrame.pack(fill=tk.X)
         nameLabel = tk.Label(nameFrame,text='Name',width=14)
         nameLabel.place(relx=0.02, rely=0.05, relwidth=0.6, relheight= 0.95, anchor=tk.NW)
@@ -461,7 +466,7 @@ class guiMain(tk.Frame):
             arrFrame = tk.Frame(propWin, width=200, height=25)
             arrFrame.pack(fill=tk.X)
 
-            arrLabel = tk.Label(arrFrame,text='Arrival rate(person/s)',width=14)
+            arrLabel = tk.Label(arrFrame,text='Arrival rate(person/min)',width=14)
             arrLabel.place(relx=0.02, rely=0.05, relwidth=0.6, relheight= 0.95, anchor=tk.NW)
             arrVar = tk.StringVar()
             arrEntry = tk.Entry(arrFrame,textvariable=arrVar)
@@ -485,26 +490,26 @@ class guiMain(tk.Frame):
                 else:
                     depEntry.config(state='disabled')
                 if val == "BTS A":
-                    depVar.set("0.024")
+                    depVar.set("1.28")#0.021
                 elif val == "BTS B":
-                    depVar.set("0.032")
+                    depVar.set("1.48")#0.024
                 elif val == "MRT":
-                    depVar.set("0.022")
+                    depVar.set("1.32")#0.022
                 elif val == "ARL":
-                    depVar.set("0.034")
+                    depVar.set("2.04")
 
             typeFrame = tk.Frame(propWin, width=200, height=25)
             typeFrame.pack(fill=tk.X)
             typeLabel = tk.Label(typeFrame,text='Type',width=14)
-            typeLabel.place(relx=0.02, rely=0.05, relwidth=0.5, relheight= 0.95, anchor=tk.NW)
+            typeLabel.place(relx=0.02, rely=0.05, relwidth=0.6, relheight= 0.95, anchor=tk.NW)
             typeVar = tk.StringVar()
             typeOption = tk.OptionMenu(typeFrame, typeVar, "custom", "BTS A", "BTS B", "MRT", "ARL", command=setDep)
             typeVar.set("custom")
-            typeOption.place(relx=0.56, rely=0.05, relwidth=0.4, relheight= 0.95, anchor=tk.NW)
+            typeOption.place(relx=0.56, rely=0.05, relwidth=0.3, relheight= 0.95, anchor=tk.NW)
 
             depFrame = tk.Frame(propWin, width=200, height=25)
             depFrame.pack(fill=tk.X)
-            depLabel = tk.Label(depFrame,text='Service rate(person/s)',width=14)
+            depLabel = tk.Label(depFrame,text='Service rate(person/min)',width=14)
             depLabel.place(relx=0.02, rely=0.05, relwidth=0.6, relheight= 0.95, anchor=tk.NW)
             depVar = tk.StringVar()
             depEntry = tk.Entry(depFrame,textvariable=depVar)
@@ -630,7 +635,7 @@ class guiMain(tk.Frame):
                 recs = line.split(",")
                 start_time = -1
                 end_time = -1
-                for rec in recs:
+                for rec in recs[1:]:
                     if rec != "\n":
                         module = rec.split(":")[0]
                         time = float(rec.split(":")[1])

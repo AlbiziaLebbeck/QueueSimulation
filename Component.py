@@ -32,7 +32,7 @@ class Source(Component_Template):
         self.tEId = 0
         self.pos = pos
 
-        self.arrivrate = 0.1
+        self.arrivrate = 1
         self.seed = Source.Count
 
         self.servicePerson = None
@@ -41,7 +41,7 @@ class Source(Component_Template):
         
     def init_run(self):
         np.random.seed(seed=self.seed)
-        self.last_arrival_time = np.random.exponential(1/self.arrivrate)
+        self.last_arrival_time = np.random.exponential(1/self.arrivrate*60)
 
     def update(self,systime):
 
@@ -56,7 +56,7 @@ class Source(Component_Template):
             p = People.person(self,q_id,self.last_arrival_time)
 
             np.random.seed(seed=int(systime*10)*self.seed)
-            interarrtime = np.random.exponential(1/self.arrivrate)
+            interarrtime = np.random.exponential(1/self.arrivrate*60)
 
             if interarrtime < 0.4:
                 interarrtime = 0.4
@@ -93,7 +93,7 @@ class Server(Component_Template):
         self.tEId = 0
         self.pos = pos
 
-        self.deprate = 0.1
+        self.deprate = 1.5
 
         self.group = 1
         self.isPlot = True
@@ -119,7 +119,7 @@ class Server(Component_Template):
                         if self.deprate == 0:
                             self.depTime = systime
                         else:
-                            self.depTime = systime + np.random.exponential(1/self.deprate)
+                            self.depTime = systime + np.random.exponential(1/self.deprate*60)
 
                         for j in range(len(self.queue[i])):
                             self.queue[i][j].queue = j

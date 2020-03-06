@@ -52,10 +52,10 @@ class simulation():
                         groupInf[group] = Information(informationWin, group)
         
         numGroup = len(groupInf)
-        informationWin.geometry("750x400")
+        informationWin.geometry("800x400")
         fig = plt.figure()
         canvas = FigureCanvasTkAgg(fig, informationWin)
-        canvas.get_tk_widget().place(x=250, y=0, width=500, height= 400,anchor=tk.NW)
+        canvas.get_tk_widget().place(x=300, y=0, width=500, height= 400,anchor=tk.NW)
 
         ax = fig.add_subplot(1,1,1)
         ax.set_title("Traffic graph", fontsize=12)
@@ -116,31 +116,35 @@ class simulation():
                         groupInf[self.modules[m].group].updatePeople()
 
                 if self.modules[m].moduleType == "Sw":
-                    if self.modules[m].isPlot:
-                        qLen = len(self.modules[m].queue[0])
-                        if self.modules[m].group == 1:
-                            groupInf[self.modules[m].group].updateLen(qLen)
-                        else:
-                            groupInf[self.modules[m].group].updateLen(qLen, groupInf[1])
+                    # if self.modules[m].isPlot:
+                    qLen = len(self.modules[m].queue[0])
+                    if self.modules[m].group == 1:
+                        groupInf[self.modules[m].group].updateLen(qLen)
+                    else:
+                        groupInf[self.modules[m].group].updateLen(qLen, groupInf[1])
 
                 if self.modules[m].moduleType == "Serv":
-                    if self.modules[m].isPlot:
-                        qLen = len(self.modules[m].queue[0])
+                    # if self.modules[m].isPlot:
+                    qLen = len(self.modules[m].queue[0])
+                    if self.modules[m].group == 1:
                         groupInf[self.modules[m].group].updateLen(qLen)
-                        if pout[0] == 2:
-                            if pout[1] != None:
-                                qTime = 0
-                                servTime = 0
-                                for i in range(1):
-                                # for i in range(len(pout[1].time)//2):
-                                    qTime += pout[1].time[-2-i*2][1] - pout[1].time[-3-i*2][1] 
-                                    servTime += pout[1].time[-1-i*2][1] - pout[1].time[-2-i*2][1] 
-                                
-                                totalTime = pout[1].time[-1][1] - pout[1].time[0][1] 
-                                if self.modules[m].group == 1:
-                                    groupInf[self.modules[m].group].updateTime(qTime, servTime, totalTime)
-                                else:
-                                    groupInf[self.modules[m].group].updateTime(qTime, servTime, totalTime, groupInf[1])
+                    else:
+                        groupInf[self.modules[m].group].updateLen(qLen, groupInf[1])
+                    if pout[0] == 2:
+                        if pout[1] != None:
+                            qTime = 0
+                            servTime = 0
+                            for i in range(len(pout[1].time)//2):
+                                qTime += pout[1].time[-2-i*2][1] - pout[1].time[-3-i*2][1] 
+                            servTime += pout[1].time[-1][1] - pout[1].time[-2][1] 
+
+                            # print(self.modules[m].group,"out")
+                            
+                            totalTime = pout[1].time[-1][1] - pout[1].time[0][1] 
+                            if self.modules[m].group == 1:
+                                groupInf[self.modules[m].group].updateTime(qTime, servTime, totalTime)
+                            else:
+                                groupInf[self.modules[m].group].updateTime(qTime, servTime, totalTime, groupInf[1])
             
             if t%10 == 0:
                 for group in groupInf:
