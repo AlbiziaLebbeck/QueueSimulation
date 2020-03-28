@@ -32,7 +32,7 @@ class simulation():
 
     def run(self):
 
-        record = open("traffic_record","w")
+        record = open("traffic_record.csv","w")
 
         showPlot = False
 
@@ -161,7 +161,7 @@ class simulation():
 
         queue_time = [[],[]]
 
-        records = open("traffic_record", "r") 
+        records = open("traffic_record.csv", "r") 
         for line in records:
             recs = line.split(",")
             group = int(recs[0])
