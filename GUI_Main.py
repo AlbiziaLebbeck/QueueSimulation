@@ -13,7 +13,7 @@ class guiMain(tk.Frame):
         super().__init__(root)
 
         self.root = root
-        self.root.title('Queue Simulation')
+        self.root.title('OpenQSIM')
 
         self.winWidth = 1024
         self.winHeight = 768
